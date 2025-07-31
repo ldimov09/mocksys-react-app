@@ -12,6 +12,7 @@ import {
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
+import { useValidation } from '../contexts/ValidationContext';
 
 export default function TransferForm() {
   const { user, login } = useAuth();
@@ -24,9 +25,12 @@ export default function TransferForm() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const { validateAll, getFieldProps, errors } = useValidation();
 
   const handlePreview = async () => {
-    if (!receiverAccount || !pin || !amount) {
+    const valid = validateAll();
+
+    if (!valid) {
       showAlert('All fields are required', 'warning');
       return;
     }
@@ -37,7 +41,7 @@ export default function TransferForm() {
       setReceiverData(response.data.data);
       setModalOpen(true);
     } catch (err) {
-      showAlert("An error occured. " + (err.response.data.data ?? ""), 'error');
+      showAlert("An error occured. " + (err.response.data.error ?? ""), 'error');
     } finally {
       setLoading(false);
     }
@@ -62,34 +66,46 @@ export default function TransferForm() {
       setPin('');
       setAmount('');
     } catch (err) {
-      showAlert(err.response?.data?.data || 'Transfer failed', 'error');
+      showAlert(err.response?.data?.error || 'Transfer failed', 'error');
     }
   };
 
   return (
     <Box sx={{ mt: 3 }}>
       <TextField
+        variant="standard"
         label="Receiver Account Number"
         fullWidth
         margin="normal"
         value={receiverAccount}
         onChange={(e) => setReceiverAccount(e.target.value)}
+        required
+        name="account_number"
+        {...getFieldProps('account_number')}
       />
       <TextField
+        variant="standard"
         label="Amount"
         fullWidth
         type="number"
         margin="normal"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
+        required
+        name="amount"
+        {...getFieldProps('amount')}
       />
       <TextField
+        variant="standard"
         label="Your PIN"
         fullWidth
         type="password"
         margin="normal"
         value={pin}
         onChange={(e) => setPin(e.target.value)}
+        required
+        name="pin"
+        {...getFieldProps('pin')}
       />
 
       <Button

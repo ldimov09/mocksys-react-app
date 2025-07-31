@@ -4,32 +4,21 @@ import { Button, TextField, Box, Typography, Container } from '@mui/material';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
+import { useValidation } from '../contexts/ValidationContext';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
 
-  const [accountNumber, setAccountNumber] = useState('');
+  const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({ accountNumber: '', password: '' });
+  const { validateAll, getFieldProps, errors } = useValidation();
+
 
   const validateFields = () => {
-    const errors = { accountNumber: '', password: '' };
-    let isValid = true;
-
-    if (!accountNumber.trim()) {
-      errors.accountNumber = 'Account number is required';
-      isValid = false;
-    }
-
-    if (!password.trim()) {
-      errors.password = 'Password is required';
-      isValid = false;
-    }
-
-    setFieldErrors(errors);
+    const isValid = validateAll();
     return isValid;
   };
 
@@ -44,7 +33,7 @@ export default function LoginPage() {
 
     try {
       const response = await api.post('/api/login', {
-        account_number: accountNumber,
+        user_name: userName,
         password,
       });
 
@@ -67,14 +56,15 @@ export default function LoginPage() {
         <Typography variant="h4" gutterBottom>Login</Typography>
         <form onSubmit={handleSubmit} noValidate>
           <TextField
-            label="Account Number"
+            label="Username"
             fullWidth
             margin="normal"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            error={Boolean(fieldErrors.accountNumber)}
-            helperText={fieldErrors.accountNumber}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
             variant="standard"
+            required
+            name="username"
+            {...getFieldProps('username')}
           />
           <TextField
             label="Password"
@@ -83,9 +73,10 @@ export default function LoginPage() {
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            error={Boolean(fieldErrors.password)}
-            helperText={fieldErrors.password}
             variant="standard"
+            required
+            name="password"
+            {...getFieldProps('password')}
           />
           {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
           <Button type="submit" variant="contained" sx={{ mt: 2 }}>

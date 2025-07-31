@@ -6,14 +6,17 @@ import './main.css'
 import { AlertProvider } from './contexts/AlertContext';
 import theme from './theme';
 import { ThemeProvider } from '@emotion/react';
+import { ValidationProvider } from './contexts/ValidationContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AlertProvider>
       <AuthProvider>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
+        <ValidationProvider>
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+        </ValidationProvider>
       </AuthProvider>
     </AlertProvider>
   </React.StrictMode>
