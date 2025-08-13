@@ -46,7 +46,7 @@ export default function Dashboard() {
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500 }}>
                         <Typography variant="h6">Welcome, {user.name}!</Typography>
-                        <Chip color="secondary" label={"Balance: Ʉ" + Number(user.balance)?.toFixed(2)} sx={{ mr: 1 }}/>
+                        <Chip color="secondary" label={"Balance: PSU " + Number(user.balance)?.toFixed(2)} sx={{ mr: 1 }}/>
                         <Chip label={"Role: " + user.role} sx={{ mr: 1 }}/>
                         <Tooltip title={parseStatus(user?.status)?.help}>
                             <Chip label={"Status: " + parseStatus(user?.status)?.name} color={parseStatus(user?.status)?.color} sx={{ mr: 1 }}/>
@@ -64,19 +64,6 @@ export default function Dashboard() {
                     </Paper>
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
-                        <Typography variant="h6" gutterBottom>Items</Typography>
-                        {user.role == "business" ? (
-                            <>
-                                <ItemManager />
-                            </>
-                        ) :
-                            <>
-                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have items.</Typography>
-                            </>
-                        }
-                    </Paper>
-
-                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
                         <Typography variant="h6" gutterBottom>Company</Typography>
                         {user.role == "business" ? (
                             <>
@@ -85,19 +72,6 @@ export default function Dashboard() {
                         ) :
                             <>
                                 <Typography variant="body1" gutterBottom>This account has to be a busiess one to have a company.</Typography>
-                            </>
-                        }
-                    </Paper>
-
-                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
-                        <Typography variant="h6" gutterBottom>Devices</Typography>
-                        {user.role == "business" ? (
-                            <>
-                                <DevicesManager />
-                            </>
-                        ) :
-                            <>
-                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have devices.</Typography>
                             </>
                         }
                     </Paper>

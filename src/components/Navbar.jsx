@@ -43,8 +43,11 @@ export default function Navbar() {
 
     // Drawer menu items
     const menuItems = [
-        user && { text: 'Dashboard', to: '/' },
+        !user && { text: 'Register Full', to: '/register/full' },
         !user && { text: 'Login', to: '/login' },
+        user && { text: 'Dashboard', to: '/' },
+        user && user?.role == "business" && { text: 'Items', to: '/items' },
+        user && user?.role == "business" && { text: 'Devices', to: '/devices' },
         user && { text: 'Logout', action: handleLogout },
     ].filter(Boolean); // remove falsey entries
 
@@ -109,17 +112,30 @@ export default function Navbar() {
 
                     <InstallButton />
 
-                    {!isSmallScreen && !user && (
+                    {!isSmallScreen && !user && ( <>
                         <Button color="inherit" component={Link} to="/login">
                             Login
                         </Button>
-                    )}
+                        <Button color="inherit" component={Link} to="/register/full">
+                            Register Full
+                        </Button>
+                    </> )}
 
                     {!isSmallScreen && user && (
                         <>
                             <Button color="inherit" component={Link} to="/">
                                 Dashboard
                             </Button>
+                            {user.role == "business" ? (
+                                <>
+                                    <Button color="inherit" component={Link} to="/items">
+                                        Items
+                                    </Button>
+                                    <Button color="inherit" component={Link} to="/devices">
+                                        Devices
+                                    </Button>
+                                </>
+                            ): <></>}
                             <Button color="inherit" onClick={handleLogout}>
                                 Logout
                             </Button>

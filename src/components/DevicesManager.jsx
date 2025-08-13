@@ -6,19 +6,28 @@ import {
     CircularProgress, MenuItem,
     Chip,
     Checkbox,
-    FormControlLabel
+    FormControlLabel,
+    Stack,
+    Card,
+    Typography,
+    Container
 } from '@mui/material';
 import { Add, Edit, Delete, Info, CheckBox } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import api from '../services/api';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 import { useAlert } from '../contexts/AlertContext';
+import DeviceKeyQRModal from './DeviceKeyQrModal';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const defaultForm = {
     name: '', address: '', number: '', device_key: '', status: 'inactive', description: ''
 };
 
 export default function DeviceManager() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [devices, setDevices] = useState([]);
     const [form, setForm] = useState(defaultForm);
     const [editId, setEditId] = useState(null);
@@ -29,8 +38,14 @@ export default function DeviceManager() {
     const [deviceToDelete, setDeviceToDelete] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const { showAlert } = useAlert();
     const [errors, setErrors] = useState({});
+
+    if(user.role != "business") {
+        showAlert("You don't have access to this page.", "warning");
+        navigate("/")
+    }
 
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -38,8 +53,10 @@ export default function DeviceManager() {
     useEffect(() => { fetchDevices(); }, []);
 
     const fetchDevices = async () => {
+        setIsLoading(true);
         const res = await api.get('/api/devices');
         setDevices(res.data);
+        setIsLoading(false);
     };
 
     const handleOpenForm = (device = null) => {
@@ -121,49 +138,64 @@ export default function DeviceManager() {
     };
 
     return (
-        <Box p={2}>
+        <Container maxWidth="md" sx={{ p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
                     Add Device
                 </Button>
             </Box>
 
-            <TableContainer component={Paper}>
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell><strong>Name</strong></TableCell>
-                            <TableCell><strong>Status</strong></TableCell>
-                            <TableCell align="right"><strong>Actions</strong></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {devices.map(device => (
-                            <TableRow key={device.id}>
-                                <TableCell>{device.name}</TableCell>
-                                <TableCell>{device.status == "disabled" ? 
-                                    <>
-                                        <Chip label="Disabled" color="error"/>
-                                    </> : 
-                                    <>
-                                        <Chip label="Enabled" color="primary"/>
-                                    </>
-                                }</TableCell>
-                                <TableCell align="right">
-                                    <IconButton onClick={() => handleOpenForm(device)}><Edit /></IconButton>
-                                    <IconButton onClick={() => {
+            <Container>
+                {isLoading ? 
+                    <>
+                        <CircularProgress size={40} />
+                    </>: 
+                <></>}
+            </Container>
+
+            <Stack spacing={2}>
+                {devices.map((device) => (
+                    <Card key={device.id} sx={{ p: 2 }}>
+                        <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            alignItems={{ xs: "flex-start", sm: "center" }}
+                            justifyContent="space-between"
+                            spacing={1}
+                        >
+                            {/* Name + Status */}
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold">
+                                    {device.name}
+                                </Typography>
+                                {device.status === "disabled" ? (
+                                    <Chip label="Disabled" color="error" size="small" />
+                                ) : (
+                                    <Chip label="Enabled" color="primary" size="small" />
+                                )}
+                            </Stack>
+
+                            {/* Actions */}
+                            <Stack direction="row" spacing={1}>
+                                <IconButton onClick={() => handleOpenForm(device)} >
+                                    <Edit />
+                                </IconButton>
+                                <IconButton
+                                    onClick={() => {
                                         setDeviceToDelete(device);
                                         setOpenDelete(true);
-                                    }}>
-                                        <Delete />
-                                    </IconButton>
-                                    <IconButton onClick={() => handleOpenDetails(device)}><Info /></IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                                    }}
+                                >
+                                    <Delete />
+                                </IconButton>
+                                <IconButton onClick={() => handleOpenDetails(device)} >
+                                    <Info />
+                                </IconButton>
+                                <DeviceKeyQRModal deviceKey={device.device_key} />
+                            </Stack>
+                        </Stack>
+                    </Card>
+                ))}
+            </Stack>
 
             {/* Unified Create/Edit Modal */}
             <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>
@@ -172,13 +204,13 @@ export default function DeviceManager() {
                     <TextField required label="Name" name="name" value={form.name} onChange={handleChange} error={!!errors.name} helperText={errors.name?.[0]} variant="standard" fullWidth />
                     <TextField required label="Address" name="address" value={form.address} onChange={handleChange} error={!!errors.address} helperText={errors.address?.[0]} variant="standard" fullWidth />
                     <TextField required label="Number" name="number" value={form.number} onChange={handleChange} error={!!errors.number} helperText={errors.number?.[0]} variant="standard" fullWidth />
-                    <TextField slotProps={{ input: { readOnly: true, }}} required label="Device Key" name="device_key" value={form.device_key} onChange={handleChange} error={!!errors.device_key} helperText={errors.device_key?.[0]} variant="standard" fullWidth />
+                    <TextField slotProps={{ input: { readOnly: true, } }} required label="Device Key" name="device_key" value={form.device_key} onChange={handleChange} error={!!errors.device_key} helperText={errors.device_key?.[0]} variant="standard" fullWidth />
                     <TextField select label="Status" name="status" value={form.status} onChange={handleChange} variant="standard" fullWidth>
                         <MenuItem value="enabled">Enabled</MenuItem>
                         <MenuItem value="disabled">Disabled</MenuItem>
                     </TextField>
                     <TextField label="Description" name="description" value={form.description} onChange={handleChange} error={!!errors.description} helperText={errors.description?.[0]} variant="standard" fullWidth />
-                    <FormControlLabel name='new_key' control={<Checkbox name="new_key" value={form.new_key} onChange={handleChange} error={!!errors.new_key} helperText={errors.new_key?.[0]}/>} label="Generate new key if editing"/>
+                    <FormControlLabel name='new_key' control={<Checkbox name="new_key" value={form.new_key} onChange={handleChange} error={!!errors.new_key} helperText={errors.new_key?.[0]} />} label="Generate new key if editing" />
                 </DialogContent>
                 <DialogActions>
                     <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
@@ -217,6 +249,6 @@ export default function DeviceManager() {
                 title="Delete Device"
                 description={`Are you sure you want to delete "${deviceToDelete?.name}"?`}
             />
-        </Box>
+        </Container>
     );
 }

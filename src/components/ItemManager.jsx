@@ -3,20 +3,27 @@ import {
     Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
     TextField, IconButton, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Paper, useMediaQuery,
-    CircularProgress
+    CircularProgress,
+    Stack,
+    Card,
+    Typography,
+    Container
 } from '@mui/material';
 import { Add, Edit, Delete, Info } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import api from '../services/api';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
-import { useValidation } from '../contexts/ValidationContext';
 import { useAlert } from '../contexts/AlertContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const defaultForm = {
     name: '', short_name: '', price: '', number: '', unit: ''
 };
 
 export default function ItemManager() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [form, setForm] = useState(defaultForm);
     const [editId, setEditId] = useState(null);
@@ -27,9 +34,14 @@ export default function ItemManager() {
     const [itemToDelete, setItemToDelete] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const { showAlert } = useAlert();
     const [errors, setErrors] = useState({});
 
+    if(user.role != "business") {
+        showAlert("You don't have access to this page.", "warning");
+        navigate("/");
+    }
 
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -37,8 +49,10 @@ export default function ItemManager() {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
+        setIsLoading(true);
         const res = await api.get('/api/items');
         setItems(res.data);
+        setIsLoading(false);
     };
 
     const handleOpenForm = (item = null) => {
@@ -119,28 +133,41 @@ export default function ItemManager() {
     };
 
     return (
-        <Box p={2}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
-                    Add Item
-                </Button>
-            </Box>
+        <Container maxWidth="md">
+            <Box p={2} sx={{ maxWidth: 900 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
+                        Add Item
+                    </Button>
+                </Box>
+                <Container>
+                    {isLoading ? 
+                        <>
+                            <CircularProgress size={40} />
+                        </>: 
+                    <></>}
+                </Container>
+                <Stack spacing={2}>
+                    {items.map(item => (
+                        <Card key={item.id} sx={{ p: 2 }}>
+                            <Stack
+                                direction={{ xs: "column", sm: "row" }}
+                                alignItems={{ xs: "flex-start", sm: "center" }}
+                                justifyContent="space-between"
+                                spacing={1}
+                            >
+                                {/* Name + Status */}
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        {item.name}
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        PSU {item.price}
+                                    </Typography>
+                                </Stack>
 
-            <TableContainer component={Paper}>
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell><strong>Name</strong></TableCell>
-                            <TableCell><strong>Price</strong></TableCell>
-                            <TableCell align="right"><strong>Actions</strong></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {items.map(item => (
-                            <TableRow key={item.id}>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>{item.price}</TableCell>
-                                <TableCell align="right">
+                                {/* Actions */}
+                                <Stack direction="row" spacing={1}>
                                     <IconButton onClick={() => handleOpenForm(item)}><Edit /></IconButton>
                                     <IconButton onClick={() => {
                                         setItemToDelete(item);
@@ -149,57 +176,57 @@ export default function ItemManager() {
                                         <Delete />
                                     </IconButton>
                                     <IconButton onClick={() => handleOpenDetails(item)}><Info /></IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                                </Stack>
+                            </Stack>
+                        </Card>
+                    ))}
+                </Stack>
 
-            {/* Unified Create/Edit Modal */}
-            <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>
-                <DialogTitle>{editId ? 'Edit Item' : 'Add Item'}</DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }} className='itemForm'>
-                    <TextField required label="Name" error={!!errors.name} helperText={errors.name?.[0]} name="name" value={form.name} onChange={handleChange} fullWidth variant="standard" />
-                    <TextField required label="Short Name" error={!!errors.short_name} helperText={errors.short_name?.[0]} name="short_name" value={form.short_name} onChange={handleChange} fullWidth variant="standard" />
-                    <TextField required label="Price" error={!!errors.price} helperText={errors.price?.[0]} name="price" type="number" value={form.price} onChange={handleChange} fullWidth variant="standard" />
-                    <TextField required label="Number" error={!!errors.number} helperText={errors.number?.[0]} name="number" type="number" value={form.number} onChange={handleChange} fullWidth variant="standard" />
-                    <TextField required label="Unit" error={!!errors.unit} helperText={errors.unit?.[0]} name="unit" value={form.unit} onChange={handleChange} fullWidth variant="standard" />
-                </DialogContent>
-                <DialogActions>
-                    <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
-                        {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Cancel'}
-                    </Button>
-                    <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
-                        {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                {/* Unified Create/Edit Modal */}
+                <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>
+                    <DialogTitle>{editId ? 'Edit Item' : 'Add Item'}</DialogTitle>
+                    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }} className='itemForm'>
+                        <TextField required label="Name" error={!!errors.name} helperText={errors.name?.[0]} name="name" value={form.name} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label="Short Name" error={!!errors.short_name} helperText={errors.short_name?.[0]} name="short_name" value={form.short_name} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label="Price" error={!!errors.price} helperText={errors.price?.[0]} name="price" type="number" value={form.price} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label="Number" error={!!errors.number} helperText={errors.number?.[0]} name="number" type="number" value={form.number} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label="Unit" error={!!errors.unit} helperText={errors.unit?.[0]} name="unit" value={form.unit} onChange={handleChange} fullWidth variant="standard" />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
+                            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Cancel'}
+                        </Button>
+                        <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
+                            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
 
-            {/* Read-Only Details Modal */}
-            <Dialog open={openDetails} onClose={handleCloseDetails} fullScreen={fullScreen}>
-                <DialogTitle>Item Details</DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }}>
-                    <TextField label="Name" value={selectedItem?.name || ''} fullWidth variant="standard" />
-                    <TextField label="Short Name" value={selectedItem?.short_name || ''} fullWidth variant="standard" />
-                    <TextField label="Price" value={selectedItem?.price || ''} fullWidth variant="standard" />
-                    <TextField label="Number" value={selectedItem?.number || ''} fullWidth variant="standard" />
-                    <TextField label="Unit" value={selectedItem?.unit || ''} fullWidth variant="standard" />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDetails} color="info">Close</Button>
-                </DialogActions>
-            </Dialog>
+                {/* Read-Only Details Modal */}
+                <Dialog open={openDetails} onClose={handleCloseDetails} fullScreen={fullScreen}>
+                    <DialogTitle>Item Details</DialogTitle>
+                    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }}>
+                        <TextField label="Name" value={selectedItem?.name || ''} fullWidth variant="standard" />
+                        <TextField label="Short Name" value={selectedItem?.short_name || ''} fullWidth variant="standard" />
+                        <TextField label="Price" value={selectedItem?.price || ''} fullWidth variant="standard" />
+                        <TextField label="Number" value={selectedItem?.number || ''} fullWidth variant="standard" />
+                        <TextField label="Unit" value={selectedItem?.unit || ''} fullWidth variant="standard" />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDetails} color="info">Close</Button>
+                    </DialogActions>
+                </Dialog>
 
-            {/* Confirm delete dialog */}
-            <ConfirmDeleteDialog
-                open={openDelete}
-                onClose={() => setOpenDelete(false)}
-                onConfirm={handleDelete}
-                isDeleting={isDeleting}
-                title="Delete Item"
-                description={`Are you sure you want to delete "${itemToDelete?.name}"?`}
-            />
-        </Box>
+                {/* Confirm delete dialog */}
+                <ConfirmDeleteDialog
+                    open={openDelete}
+                    onClose={() => setOpenDelete(false)}
+                    onConfirm={handleDelete}
+                    isDeleting={isDeleting}
+                    title="Delete Item"
+                    description={`Are you sure you want to delete "${itemToDelete?.name}"?`}
+                />
+            </Box>
+        </Container>
     );
 }
