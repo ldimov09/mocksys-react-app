@@ -28,7 +28,7 @@ export default function TransferForm() {
   const { validateAll, getFieldProps, errors } = useValidation();
 
   const handlePreview = async () => {
-    const valid = validateAll();
+    const valid = validateAll(document.querySelector(".transferForm"));
 
     if (!valid) {
       showAlert('All fields are required', 'warning');
@@ -71,7 +71,7 @@ export default function TransferForm() {
   };
 
   return (
-    <Box sx={{ mt: 3 }}>
+    <Box sx={{ mt: 3 }} className="transferForm">
       <TextField
         variant="standard"
         label="Receiver Account Number"

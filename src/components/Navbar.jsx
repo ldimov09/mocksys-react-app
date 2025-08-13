@@ -107,7 +107,7 @@ export default function Navbar() {
                         Mocksys
                     </Typography>
 
-                    {!isSmallScreen && <InstallButton />}
+                    <InstallButton />
 
                     {!isSmallScreen && !user && (
                         <Button color="inherit" component={Link} to="/login">

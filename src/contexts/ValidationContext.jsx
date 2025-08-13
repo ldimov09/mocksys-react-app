@@ -15,12 +15,12 @@ export function ValidationProvider({ children }) {
     let hasErrors = false;
 
     requiredFields.forEach((field) => {
-        console.log(field);
       const value = field.value?.toString().trim() || '';
       const name = field.name || null;
       if (!name) return; // skip fields without name
 
       if (value === '') {
+        console.log(field);
         newErrors[name] = 'This field is required';
         hasErrors = true;
       }

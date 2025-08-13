@@ -3,6 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import TransferForm from '../components/TransferForm';
 import KeysModule from '../components/KeysModule';
+import ItemManager from '../components/ItemManager';
+import CompanyManager from '../components/CompanyManager';
+import DevicesManager from '../components/DevicesManager';
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -57,13 +60,44 @@ export default function Dashboard() {
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
                         <Typography variant="h6" gutterBottom>Keys handling</Typography>
+                            <KeysModule />
+                    </Paper>
+
+                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
+                        <Typography variant="h6" gutterBottom>Items</Typography>
                         {user.role == "business" ? (
                             <>
-                                <KeysModule />
+                                <ItemManager />
                             </>
                         ) :
                             <>
-                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have keys</Typography>
+                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have items.</Typography>
+                            </>
+                        }
+                    </Paper>
+
+                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
+                        <Typography variant="h6" gutterBottom>Company</Typography>
+                        {user.role == "business" ? (
+                            <>
+                                <CompanyManager />
+                            </>
+                        ) :
+                            <>
+                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have a company.</Typography>
+                            </>
+                        }
+                    </Paper>
+
+                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
+                        <Typography variant="h6" gutterBottom>Devices</Typography>
+                        {user.role == "business" ? (
+                            <>
+                                <DevicesManager />
+                            </>
+                        ) :
+                            <>
+                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have devices.</Typography>
                             </>
                         }
                     </Paper>

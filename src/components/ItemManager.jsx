@@ -1,0 +1,205 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+    TextField, IconButton, Table, TableBody, TableCell,
+    TableContainer, TableHead, TableRow, Paper, useMediaQuery,
+    CircularProgress
+} from '@mui/material';
+import { Add, Edit, Delete, Info } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
+import api from '../services/api';
+import ConfirmDeleteDialog from './ConfirmDeleteDialog';
+import { useValidation } from '../contexts/ValidationContext';
+import { useAlert } from '../contexts/AlertContext';
+
+const defaultForm = {
+    name: '', short_name: '', price: '', number: '', unit: ''
+};
+
+export default function ItemManager() {
+    const [items, setItems] = useState([]);
+    const [form, setForm] = useState(defaultForm);
+    const [editId, setEditId] = useState(null);
+    const [openForm, setOpenForm] = useState(false);
+    const [openDetails, setOpenDetails] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [openDelete, setOpenDelete] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const { showAlert } = useAlert();
+    const [errors, setErrors] = useState({});
+
+
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+    useEffect(() => { fetchItems(); }, []);
+
+    const fetchItems = async () => {
+        const res = await api.get('/api/items');
+        setItems(res.data);
+    };
+
+    const handleOpenForm = (item = null) => {
+        setErrors({});
+        if (item) {
+            setForm({ ...item });
+            setEditId(item.id);
+        } else {
+            setForm(defaultForm);
+            setEditId(null);
+        }
+        setOpenForm(true);
+    };
+
+    const handleCloseForm = () => {
+        setForm(defaultForm);
+        setEditId(null);
+        setOpenForm(false);
+    };
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            if (itemToDelete) {
+                await api.delete(`/api/items/${itemToDelete.id}`);
+                await fetchItems();
+            }
+        } catch (err) {
+            console.error('Delete failed:', err);
+            showAlert("Unexpected error occured " + err, "error");
+        } finally {
+            showAlert("Item deleted.", "success");
+            setIsDeleting(false);
+            setOpenDelete(false);
+            setItemToDelete(null);
+        }
+    }
+
+    const handleChange = (e) => {
+        setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleSubmit = async () => {
+        setIsSaving(true);
+        try {
+            const payload = { ...form };
+
+            if (editId) {
+                await api.put(`/api/items/${editId}`, payload);
+            } else {
+                await api.post('/api/items', payload);
+            }
+
+            await fetchItems();
+            handleCloseForm();
+            setErrors({});
+            showAlert("Item saved.", "success");
+        } catch (err) {
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+                showAlert("There are errors in your form.", "warning");
+            } else {
+                console.error('Unexpected error:', err);
+                showAlert("Unexpected error occured " + err, "error");
+            }
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    const handleOpenDetails = (item) => {
+        setSelectedItem(item);
+        setOpenDetails(true);
+    };
+
+    const handleCloseDetails = () => {
+        setSelectedItem(null);
+        setOpenDetails(false);
+    };
+
+    return (
+        <Box p={2}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
+                    Add Item
+                </Button>
+            </Box>
+
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><strong>Name</strong></TableCell>
+                            <TableCell><strong>Price</strong></TableCell>
+                            <TableCell align="right"><strong>Actions</strong></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {items.map(item => (
+                            <TableRow key={item.id}>
+                                <TableCell>{item.name}</TableCell>
+                                <TableCell>{item.price}</TableCell>
+                                <TableCell align="right">
+                                    <IconButton onClick={() => handleOpenForm(item)}><Edit /></IconButton>
+                                    <IconButton onClick={() => {
+                                        setItemToDelete(item);
+                                        setOpenDelete(true);
+                                    }}>
+                                        <Delete />
+                                    </IconButton>
+                                    <IconButton onClick={() => handleOpenDetails(item)}><Info /></IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            {/* Unified Create/Edit Modal */}
+            <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>
+                <DialogTitle>{editId ? 'Edit Item' : 'Add Item'}</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }} className='itemForm'>
+                    <TextField required label="Name" error={!!errors.name} helperText={errors.name?.[0]} name="name" value={form.name} onChange={handleChange} fullWidth variant="standard" />
+                    <TextField required label="Short Name" error={!!errors.short_name} helperText={errors.short_name?.[0]} name="short_name" value={form.short_name} onChange={handleChange} fullWidth variant="standard" />
+                    <TextField required label="Price" error={!!errors.price} helperText={errors.price?.[0]} name="price" type="number" value={form.price} onChange={handleChange} fullWidth variant="standard" />
+                    <TextField required label="Number" error={!!errors.number} helperText={errors.number?.[0]} name="number" type="number" value={form.number} onChange={handleChange} fullWidth variant="standard" />
+                    <TextField required label="Unit" error={!!errors.unit} helperText={errors.unit?.[0]} name="unit" value={form.unit} onChange={handleChange} fullWidth variant="standard" />
+                </DialogContent>
+                <DialogActions>
+                    <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
+                        {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Cancel'}
+                    </Button>
+                    <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
+                        {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Read-Only Details Modal */}
+            <Dialog open={openDetails} onClose={handleCloseDetails} fullScreen={fullScreen}>
+                <DialogTitle>Item Details</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }}>
+                    <TextField label="Name" value={selectedItem?.name || ''} fullWidth variant="standard" />
+                    <TextField label="Short Name" value={selectedItem?.short_name || ''} fullWidth variant="standard" />
+                    <TextField label="Price" value={selectedItem?.price || ''} fullWidth variant="standard" />
+                    <TextField label="Number" value={selectedItem?.number || ''} fullWidth variant="standard" />
+                    <TextField label="Unit" value={selectedItem?.unit || ''} fullWidth variant="standard" />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDetails} color="info">Close</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Confirm delete dialog */}
+            <ConfirmDeleteDialog
+                open={openDelete}
+                onClose={() => setOpenDelete(false)}
+                onConfirm={handleDelete}
+                isDeleting={isDeleting}
+                title="Delete Item"
+                description={`Are you sure you want to delete "${itemToDelete?.name}"?`}
+            />
+        </Box>
+    );
+}

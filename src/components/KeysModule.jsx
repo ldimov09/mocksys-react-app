@@ -92,7 +92,11 @@ export default function KeysModule() {
     <Box sx={{ mt: 4 }}>
       <Grid container spacing={2}>
         <Grid item>{renderKeyCard('transaction')}</Grid>
-        <Grid item>{renderKeyCard('fiscal')}</Grid>
+        {(user.role == "business") ? 
+          <>
+            <Grid item>{renderKeyCard('fiscal')}</Grid>
+          </> 
+        : <></>}
       </Grid>
     </Box>
   );
