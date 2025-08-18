@@ -54,11 +54,6 @@ export default function Dashboard() {
                     </Paper>
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
-                        <Typography variant="h6" gutterBottom>Transfer to another account</Typography>
-                        <TransferForm />
-                    </Paper>
-
-                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
                         <Typography variant="h6" gutterBottom>Keys handling</Typography>
                             <KeysModule />
                     </Paper>

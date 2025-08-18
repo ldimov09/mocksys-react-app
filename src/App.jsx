@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import RegisterFull from './pages/RegisterFull';
 import DeviceManager from './components/DevicesManager';
+import Transfers from './pages/Transfers';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/register/full" element={<RegisterFull />} />
         <Route path="/items" element={<ItemManager />} />
         <Route path="/devices" element={<DeviceManager />} />
+        <Route path="/transfers" element={<Transfers />} />
         <Route path="/" element={<Dashboard />} />
       </Routes>
     </Router>

@@ -46,6 +46,7 @@ export default function Navbar() {
         !user && { text: 'Register Full', to: '/register/full' },
         !user && { text: 'Login', to: '/login' },
         user && { text: 'Dashboard', to: '/' },
+        user && { text: 'Transfers', to: '/transfers' },
         user && user?.role == "business" && { text: 'Items', to: '/items' },
         user && user?.role == "business" && { text: 'Devices', to: '/devices' },
         user && { text: 'Logout', action: handleLogout },
@@ -80,7 +81,7 @@ export default function Navbar() {
                                 <ListItemText primary={text} />
                             </ListItemButton>
                         ) : (
-                            <ListItemButton onClick={action} disabled={disabled} sx={{ color: 'inherit' }}>
+                            <ListItemButton onClick={action} disabled={disabled} sx={{ color: 'inherit', textTransform: 'uppercase' }}>
                                 <ListItemText primary={text} />
                             </ListItemButton>
                         )}
@@ -113,7 +114,7 @@ export default function Navbar() {
                     <InstallButton />
 
                     {!isSmallScreen && !user && ( <>
-                        <Button color="inherit" component={Link} to="/login">
+                        <Button color="inherit" component={Link} to="/login" sx={{textTransform: "uppercase"}}>
                             Login
                         </Button>
                         <Button color="inherit" component={Link} to="/register/full">
@@ -126,6 +127,9 @@ export default function Navbar() {
                             <Button color="inherit" component={Link} to="/">
                                 Dashboard
                             </Button>
+                            <Button color="inherit" component={Link} to="/transfers">
+                                Transfers
+                            </Button>
                             {user.role == "business" ? (
                                 <>
                                     <Button color="inherit" component={Link} to="/items">
@@ -136,7 +140,7 @@ export default function Navbar() {
                                     </Button>
                                 </>
                             ): <></>}
-                            <Button color="inherit" onClick={handleLogout}>
+                            <Button color="inherit" onClick={handleLogout} sx={{textTransform: "uppercase"}}>
                                 Logout
                             </Button>
                         </>

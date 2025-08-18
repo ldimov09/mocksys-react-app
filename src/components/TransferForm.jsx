@@ -57,6 +57,8 @@ export default function TransferForm() {
 
       const response = await api.post('/api/transfer', payload);
 
+      console.log(response?.data?.balance);
+
       user.balance = response.data.balance ?? user.balance;
 
       login(user); // Update user context (e.g. new balance)
@@ -124,7 +126,7 @@ export default function TransferForm() {
             <>
               <Typography><strong>To:</strong> {receiverData.name}</Typography>
               <Typography><strong>Account:</strong> {receiverData.account_number}</Typography>
-              <Typography><strong>Amount:</strong> Ʉ{Number(amount).toFixed(2)}</Typography>
+              <Typography><strong>Amount:</strong> PSU {Number(amount).toFixed(2)}</Typography>
             </>
           )}
         </DialogContent>
