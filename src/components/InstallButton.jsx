@@ -1,9 +1,11 @@
 import { Button } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useTranslations } from '../contexts/TranslationContext';
 
 const InstallButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const { t } = useTranslations();
 
   useEffect(() => {
     const handler = (e) => {
@@ -29,7 +31,7 @@ const InstallButton = () => {
 
   return isVisible ? (
     <Button onClick={handleClick} style={{ marginLeft: 'auto' }} color="inherit">
-      Install App
+      {t('common.install')}
     </Button>
   ) : null;
 };

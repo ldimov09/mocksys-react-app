@@ -20,13 +20,15 @@ import { useAlert } from '../contexts/AlertContext';
 import DeviceKeyQRModal from './DeviceKeyQrModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslations } from '../contexts/TranslationContext';
 
 const defaultForm = {
-    name: '', address: '', number: '', device_key: '', status: 'inactive', description: ''
+    name: '', address: '', number: '', device_key: '', status: 'disabled', description: ''
 };
 
 export default function DeviceManager() {
     const { user } = useAuth();
+    const { locale, setLocale, t } = useTranslations();
     const navigate = useNavigate();
     const [devices, setDevices] = useState([]);
     const [form, setForm] = useState(defaultForm);
@@ -42,9 +44,9 @@ export default function DeviceManager() {
     const { showAlert } = useAlert();
     const [errors, setErrors] = useState({});
 
-    if(user.role != "business") {
-        showAlert("You don't have access to this page.", "warning");
-        navigate("/")
+    if (user.role != "business") {
+        showAlert(t('common.no_access_page'), "warning");
+        navigate("/");
     }
 
     const theme = useTheme();
@@ -86,14 +88,14 @@ export default function DeviceManager() {
             }
         } catch (err) {
             console.error('Delete failed:', err);
-            showAlert("Unexpected error occurred " + err, "error");
+            showAlert(`${t('common.unexpected_error')} ${err}`, "error");
         } finally {
-            showAlert("Device deleted.", "success");
+            showAlert(t('devices.device_deleted'), "success");
             setIsDeleting(false);
             setOpenDelete(false);
             setDeviceToDelete(null);
         }
-    }
+    };
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -113,14 +115,14 @@ export default function DeviceManager() {
             await fetchDevices();
             handleCloseForm();
             setErrors({});
-            showAlert("Device saved.", "success");
+            showAlert(t('devices.device_saved'), "success");
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
-                showAlert("There are errors in your form.", "warning");
+                showAlert(t('common.form_errors'), "warning");
             } else {
                 console.error('Unexpected error:', err);
-                showAlert("Unexpected error occurred " + err, "error");
+                showAlert(`${t('common.unexpected_error')} ${err}`, "error");
             }
         } finally {
             setIsSaving(false);
@@ -141,16 +143,14 @@ export default function DeviceManager() {
         <Container maxWidth="md" sx={{ p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
-                    Add Device
+                    {t('devices.add_device')}
                 </Button>
             </Box>
 
             <Container>
-                {isLoading ? 
-                    <>
-                        <CircularProgress size={40} />
-                    </>: 
-                <></>}
+                {isLoading ?
+                    <CircularProgress size={40} /> :
+                    <></>}
             </Container>
 
             <Stack spacing={2}>
@@ -165,12 +165,12 @@ export default function DeviceManager() {
                             {/* Name + Status */}
                             <Stack direction="row" spacing={1} alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold">
-                                    {device.name}
+                                    {device.device_name}
                                 </Typography>
                                 {device.status === "disabled" ? (
-                                    <Chip label="Disabled" color="error" size="small" />
+                                    <Chip label={t('devices.disabled')} color="error" size="small" />
                                 ) : (
-                                    <Chip label="Enabled" color="primary" size="small" />
+                                    <Chip label={t('devices.enabled')} color="primary" size="small" />
                                 )}
                             </Stack>
 
@@ -196,48 +196,46 @@ export default function DeviceManager() {
                     </Card>
                 ))}
             </Stack>
-
             {/* Unified Create/Edit Modal */}
             <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>
-                <DialogTitle>{editId ? 'Edit Device' : 'Add Device'}</DialogTitle>
+                <DialogTitle>{editId ? t('devices.edit_device') : t('devices.add_device')}</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }}>
-                    <TextField required label="Name" name="name" value={form.name} onChange={handleChange} error={!!errors.name} helperText={errors.name?.[0]} variant="standard" fullWidth />
-                    <TextField required label="Address" name="address" value={form.address} onChange={handleChange} error={!!errors.address} helperText={errors.address?.[0]} variant="standard" fullWidth />
-                    <TextField required label="Number" name="number" value={form.number} onChange={handleChange} error={!!errors.number} helperText={errors.number?.[0]} variant="standard" fullWidth />
-                    <TextField slotProps={{ input: { readOnly: true, } }} required label="Device Key" name="device_key" value={form.device_key} onChange={handleChange} error={!!errors.device_key} helperText={errors.device_key?.[0]} variant="standard" fullWidth />
-                    <TextField select label="Status" name="status" value={form.status} onChange={handleChange} variant="standard" fullWidth>
-                        <MenuItem value="enabled">Enabled</MenuItem>
-                        <MenuItem value="disabled">Disabled</MenuItem>
+                    <TextField required label={t('devices.name')} name="device_name" value={form.device_name} onChange={handleChange} error={!!errors.device_name} helperText={errors.device_name?.[0]} variant="standard" fullWidth />
+                    <TextField required label={t('devices.address')} name="device_address" value={form.device_address} onChange={handleChange} error={!!errors.device_address} helperText={errors.device_address?.[0]} variant="standard" fullWidth />
+                    <TextField required label={t('devices.number')} name="number" value={form.number} onChange={handleChange} error={!!errors.number} helperText={errors.number?.[0]} variant="standard" fullWidth />
+                    <TextField slotProps={{ input: { readOnly: true } }} required label={t('devices.device_key')} name="device_key" value={form.device_key} onChange={handleChange} error={!!errors.device_key} helperText={errors.device_key?.[0]} variant="standard" fullWidth />
+                    <TextField select label={t('devices.status')} name="status" value={form.status} onChange={handleChange} variant="standard" fullWidth>
+                        <MenuItem value="enabled">{t('devices.enabled')}</MenuItem>
+                        <MenuItem value="disabled">{t('devices.disabled')}</MenuItem>
                     </TextField>
-                    <TextField label="Description" name="description" value={form.description} onChange={handleChange} error={!!errors.description} helperText={errors.description?.[0]} variant="standard" fullWidth />
-                    <FormControlLabel name='new_key' control={<Checkbox name="new_key" value={form.new_key} onChange={handleChange} error={!!errors.new_key} helperText={errors.new_key?.[0]} />} label="Generate new key if editing" />
+                    <TextField label={t('devices.description')} name="description" value={form.description} onChange={handleChange} error={!!errors.description} helperText={errors.description?.[0]} variant="standard" fullWidth />
+                    <FormControlLabel name='new_key' control={<Checkbox name="new_key" value={form.new_key} onChange={handleChange} error={!!errors.new_key} helperText={errors.new_key?.[0]} />} label={t('devices.generate_new_key')} />
                 </DialogContent>
                 <DialogActions>
                     <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
-                        {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Cancel'}
+                        {isSaving ? <CircularProgress size={20} color="inherit" /> : t('common.cancel')}
                     </Button>
                     <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
-                        {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+                        {isSaving ? <CircularProgress size={20} color="inherit" /> : t('common.save')}
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Read-Only Details Modal */}
             <Dialog open={openDetails} onClose={handleCloseDetails} fullScreen={fullScreen}>
-                <DialogTitle>Device Details</DialogTitle>
+                <DialogTitle>{t('devices.device_details')}</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }}>
-                    <TextField label="ID" value={selectedDevice?.id || ''} fullWidth variant="standard" />
-                    <TextField label="Name" value={selectedDevice?.name || ''} fullWidth variant="standard" />
-                    <TextField label="Address" value={selectedDevice?.address || ''} fullWidth variant="standard" />
-                    <TextField label="Number" value={selectedDevice?.number || ''} fullWidth variant="standard" />
-                    <TextField label="Device Key" value={selectedDevice?.device_key || ''} fullWidth variant="standard" />
-                    <TextField label="Status" value={selectedDevice?.status || ''} fullWidth variant="standard" />
-                    <TextField label="Description" value={selectedDevice?.description || ''} fullWidth variant="standard" />
-                    <TextField label="Last Request" value={selectedDevice?.last_seen || ''} fullWidth variant="standard" />
-                    <TextField label="Last IP" value={selectedDevice?.last_ip || ''} fullWidth variant="standard" />
+                    <TextField label={"ID"} value={selectedDevice?.id || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.name')} value={selectedDevice?.device_name || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.address')} value={selectedDevice?.device_address || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.number')} value={selectedDevice?.number || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.device_key')} value={selectedDevice?.device_key || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.status')} value={selectedDevice?.status || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.description')} value={selectedDevice?.description || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.last_request')} value={selectedDevice?.last_seen || ''} fullWidth variant="standard" />
+                    <TextField label={t('devices.last_ip')} value={selectedDevice?.last_ip || ''} fullWidth variant="standard" />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDetails} color="info">Close</Button>
+                    <Button onClick={handleCloseDetails} color="info">{t('common.close')}</Button>
                 </DialogActions>
             </Dialog>
 
@@ -246,8 +244,8 @@ export default function DeviceManager() {
                 onClose={() => setOpenDelete(false)}
                 onConfirm={handleDelete}
                 isDeleting={isDeleting}
-                title="Delete Device"
-                description={`Are you sure you want to delete "${deviceToDelete?.name}"?`}
+                title={t('devices.delete_device')}
+                description={t('devices.delete_confirmation') + " " + deviceToDelete?.device_name + "?" }
             />
         </Container>
     );

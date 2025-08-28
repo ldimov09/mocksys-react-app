@@ -16,6 +16,7 @@ import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 import { useAlert } from '../contexts/AlertContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslations } from '../contexts/TranslationContext';
 
 const defaultForm = {
     name: '', short_name: '', price: '', number: '', unit: ''
@@ -24,6 +25,7 @@ const defaultForm = {
 export default function ItemManager() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslations();
     const [items, setItems] = useState([]);
     const [form, setForm] = useState(defaultForm);
     const [editId, setEditId] = useState(null);
@@ -38,8 +40,8 @@ export default function ItemManager() {
     const { showAlert } = useAlert();
     const [errors, setErrors] = useState({});
 
-    if(user.role != "business") {
-        showAlert("You don't have access to this page.", "warning");
+    if (user.role != "business") {
+        showAlert(t('common.no_access_page'), "warning");
         navigate("/");
     }
 
@@ -82,14 +84,14 @@ export default function ItemManager() {
             }
         } catch (err) {
             console.error('Delete failed:', err);
-            showAlert("Unexpected error occured " + err, "error");
+            showAlert(t('common.unexpected_error') + " " + err, "error");
         } finally {
-            showAlert("Item deleted.", "success");
+            showAlert(t('items.item_deleted'), "success");
             setIsDeleting(false);
             setOpenDelete(false);
             setItemToDelete(null);
         }
-    }
+    };
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -109,19 +111,20 @@ export default function ItemManager() {
             await fetchItems();
             handleCloseForm();
             setErrors({});
-            showAlert("Item saved.", "success");
+            showAlert(t('items.item_saved'), "success");
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
-                showAlert("There are errors in your form.", "warning");
+                showAlert(t('common.form_errors'), "warning");
             } else {
                 console.error('Unexpected error:', err);
-                showAlert("Unexpected error occured " + err, "error");
+                showAlert(t('common.unexpected_error') + " " + err, "error");
             }
         } finally {
             setIsSaving(false);
         }
     };
+
     const handleOpenDetails = (item) => {
         setSelectedItem(item);
         setOpenDetails(true);
@@ -137,15 +140,15 @@ export default function ItemManager() {
             <Box p={2} sx={{ maxWidth: 900 }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
-                        Add Item
+                        {t('items.add_item')}
                     </Button>
                 </Box>
                 <Container>
-                    {isLoading ? 
+                    {isLoading ?
                         <>
                             <CircularProgress size={40} />
-                        </>: 
-                    <></>}
+                        </> :
+                        <></>}
                 </Container>
                 <Stack spacing={2}>
                     {items.map(item => (
@@ -184,36 +187,36 @@ export default function ItemManager() {
 
                 {/* Unified Create/Edit Modal */}
                 <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>
-                    <DialogTitle>{editId ? 'Edit Item' : 'Add Item'}</DialogTitle>
+                    <DialogTitle>{editId ? t('items.edit_item') : t('items.add_item')}</DialogTitle>
                     <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }} className='itemForm'>
-                        <TextField required label="Name" error={!!errors.name} helperText={errors.name?.[0]} name="name" value={form.name} onChange={handleChange} fullWidth variant="standard" />
-                        <TextField required label="Short Name" error={!!errors.short_name} helperText={errors.short_name?.[0]} name="short_name" value={form.short_name} onChange={handleChange} fullWidth variant="standard" />
-                        <TextField required label="Price" error={!!errors.price} helperText={errors.price?.[0]} name="price" type="number" value={form.price} onChange={handleChange} fullWidth variant="standard" />
-                        <TextField required label="Number" error={!!errors.number} helperText={errors.number?.[0]} name="number" type="number" value={form.number} onChange={handleChange} fullWidth variant="standard" />
-                        <TextField required label="Unit" error={!!errors.unit} helperText={errors.unit?.[0]} name="unit" value={form.unit} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label={t('items.name')} error={!!errors.name} helperText={errors.name?.[0]} name="name" value={form.name} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label={t('items.short_name')} error={!!errors.short_name} helperText={errors.short_name?.[0]} name="short_name" value={form.short_name} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label={t('items.price')} error={!!errors.price} helperText={errors.price?.[0]} name="price" type="number" value={form.price} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label={t('items.number')} error={!!errors.number} helperText={errors.number?.[0]} name="number" type="number" value={form.number} onChange={handleChange} fullWidth variant="standard" />
+                        <TextField required label={t('items.unit')} error={!!errors.unit} helperText={errors.unit?.[0]} name="unit" value={form.unit} onChange={handleChange} fullWidth variant="standard" />
                     </DialogContent>
                     <DialogActions>
                         <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
-                            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Cancel'}
+                            {isSaving ? <CircularProgress size={20} color="inherit" /> : t('common.cancel')}
                         </Button>
                         <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
-                            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+                            {isSaving ? <CircularProgress size={20} color="inherit" /> : t('common.save')}
                         </Button>
                     </DialogActions>
                 </Dialog>
 
                 {/* Read-Only Details Modal */}
                 <Dialog open={openDetails} onClose={handleCloseDetails} fullScreen={fullScreen}>
-                    <DialogTitle>Item Details</DialogTitle>
+                    <DialogTitle>{t('items.item_details')}</DialogTitle>
                     <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, minWidth: 350 }}>
-                        <TextField label="Name" value={selectedItem?.name || ''} fullWidth variant="standard" />
-                        <TextField label="Short Name" value={selectedItem?.short_name || ''} fullWidth variant="standard" />
-                        <TextField label="Price" value={selectedItem?.price || ''} fullWidth variant="standard" />
-                        <TextField label="Number" value={selectedItem?.number || ''} fullWidth variant="standard" />
-                        <TextField label="Unit" value={selectedItem?.unit || ''} fullWidth variant="standard" />
+                        <TextField label={t('items.name')} value={selectedItem?.name || ''} fullWidth variant="standard" />
+                        <TextField label={t('items.short_name')} value={selectedItem?.short_name || ''} fullWidth variant="standard" />
+                        <TextField label={t('items.price')} value={selectedItem?.price || ''} fullWidth variant="standard" />
+                        <TextField label={t('items.number')} value={selectedItem?.number || ''} fullWidth variant="standard" />
+                        <TextField label={t('items.unit')} value={selectedItem?.unit || ''} fullWidth variant="standard" />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseDetails} color="info">Close</Button>
+                        <Button onClick={handleCloseDetails} color="info">{t('common.close')}</Button>
                     </DialogActions>
                 </Dialog>
 
@@ -223,8 +226,8 @@ export default function ItemManager() {
                     onClose={() => setOpenDelete(false)}
                     onConfirm={handleDelete}
                     isDeleting={isDeleting}
-                    title="Delete Item"
-                    description={`Are you sure you want to delete "${itemToDelete?.name}"?`}
+                    title={t('items.delete_item')}
+                    description={t('items.delete_item_confirm') + " " + itemToDelete?.name + "?" }
                 />
             </Box>
         </Container>

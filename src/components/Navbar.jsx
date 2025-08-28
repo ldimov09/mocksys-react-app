@@ -12,17 +12,21 @@ import {
     ListItemText,
     Box,
     useTheme,
-    useMediaQuery
+    useMediaQuery,
+    ToggleButtonGroup,
+    ToggleButton
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import InstallButton from './InstallButton';
 import { useAlert } from '../contexts/AlertContext';
+import { useTranslations } from '../contexts/TranslationContext';
 
 export default function Navbar() {
     const { showAlert } = useAlert();
     const { user, logout } = useAuth();
+    const { locale, setLocale } = useTranslations();
     const navigate = useNavigate();
 
     const theme = useTheme();
@@ -113,14 +117,14 @@ export default function Navbar() {
 
                     <InstallButton />
 
-                    {!isSmallScreen && !user && ( <>
-                        <Button color="inherit" component={Link} to="/login" sx={{textTransform: "uppercase"}}>
+                    {!isSmallScreen && !user && (<>
+                        <Button color="inherit" component={Link} to="/login" sx={{ textTransform: "uppercase" }}>
                             Login
                         </Button>
                         <Button color="inherit" component={Link} to="/register/full">
                             Register Full
                         </Button>
-                    </> )}
+                    </>)}
 
                     {!isSmallScreen && user && (
                         <>
@@ -139,11 +143,21 @@ export default function Navbar() {
                                         Devices
                                     </Button>
                                 </>
-                            ): <></>}
-                            <Button color="inherit" onClick={handleLogout} sx={{textTransform: "uppercase"}}>
+                            ) : <></>}
+                            <Button color="inherit" onClick={handleLogout} sx={{ textTransform: "uppercase" }}>
                                 Logout
                             </Button>
                         </>
+                    )}
+
+                    {locale == "en"? (
+                        <Button value="bg" aria-label="BG" onClick={(e) => setLocale('bg')}>
+                            <img src="flag-bg-250.png" alt="BG" width={32}/>
+                        </Button>
+                        ) : (
+                        <Button value="en" aria-label="EN" onClick={(e) => setLocale('en')}>
+                            <img src="flag-us.png" alt="EN" width={32}/>
+                        </Button>
                     )}
                 </Toolbar>
             </AppBar>
