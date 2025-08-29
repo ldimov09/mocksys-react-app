@@ -3,17 +3,15 @@ import TransferForm from "../components/TransferForm";
 import { use, useEffect, useState } from "react";
 import api from "../services/api";
 import { Info } from "@mui/icons-material";
-
-const TYPES = {
-    "card_payment": "Card Payment",
-    "transfer": "Transfer",
-}
+import { useTranslations } from "../contexts/TranslationContext";
 
 export default function Transfers() {
     const [transfers, setTransfers] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [selected, setSelected] = useState(null);
     const [tab, setTab] = useState(0);
+
+    const { t } = useTranslations();
 
     const handleChange = (event, newValue) => setTab(newValue);
     const openModal = (transfer) => setSelected(transfer);
@@ -28,159 +26,121 @@ export default function Transfers() {
         setIsLoading(false);
     };
 
+    const TYPES = {
+        "card_payment": t('transfers.types.card_payment'),
+        "transfer": t('transfers.types.transfer'),
+    };
+
     return (
         <>
             <Container sx={{ maxWidth: 500 }}>
                 <Paper elevation={3} sx={{ p: 3, maxWidth: 500, m: 3 }}>
-                    <Typography variant="h6" gutterBottom>Transfer to another account</Typography>
+                    <Typography variant="h6" gutterBottom>
+                        {t('transfers.title')}
+                    </Typography>
                     <TransferForm />
                 </Paper>
                 <Container>
-                    {isLoading ?
-                        <>
-                            <CircularProgress size={40} />
-                        </> :
-                        <></>}
+                    {isLoading && <CircularProgress size={40} />}
                 </Container>
-                {!isLoading ? (
-                    <>
-                        <Container sx={{ m: 0 }}>
-                            <Tabs value={tab} onChange={handleChange} sx={{ mb: 2 }}>
-                                <Tab label="As receiver - last 30 days" />
-                                <Tab label="As sender - last 30 days" />
-                            </Tabs>
 
-                            {/* Receiver tab */}
-                            {tab === 0 && (
-                                <Box>
-                                    <Stack spacing={2}>
-                                        {transfers?.asReceiver?.length ? (
-                                            transfers.asReceiver.map((transfer) => (
-                                                <Card sx={{ p: 2 }} key={transfer.id}>
-                                                    <Stack
-                                                        direction={{ xs: "column", sm: "row" }}
-                                                        alignItems={{ xs: "flex-start", sm: "center" }}
-                                                        justifyContent="space-between"
-                                                        spacing={1}
-                                                    >
-                                                        <Stack direction="row" spacing={1} alignItems="center">
-                                                            <Typography variant="subtitle1" fontWeight="bold">
-                                                                {TYPES[transfer.type] ?? "Other Payment"}
-                                                            </Typography>
-                                                            <Typography variant="body1" color="primary">
-                                                                +{transfer.amount} PSU
-                                                            </Typography>
-                                                            {transfer.status === "approved" ? (
-                                                                <Chip sx={{ml: 1}} label="Approved" color="primary" size="small" />
-                                                            ) : transfer.status === "pending" ? (
-                                                                <Chip sx={{ml: 1}} label="Pending" color="info" size="small" />
-                                                            ) : transfer.status === "refunded" ? (
-                                                                <Chip sx={{ml: 1}} label="Refunded" color="warning" size="small" />
-                                                            ) : (
-                                                                <Chip sx={{ml: 1}} label="Declined" color="error" size="small" />
-                                                            )}
-                                                            <IconButton onClick={() => openModal(transfer)}><Info /></IconButton>
-                                                        </Stack>
-                                                    </Stack>
-                                                </Card>
-                                            ))
-                                        ) : (
-                                            <Typography variant="h6" gutterBottom>
-                                                No received transfers
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Box>
-                            )}
+                {!isLoading && (
+                    <Container sx={{ m: 0 }}>
+                        <Tabs value={tab} onChange={handleChange} sx={{ mb: 2 }} scrollButtons="auto" variant="scrollable">
+                            <Tab label={t('transfers.as_receiver')} />
+                            <Tab label={t('transfers.as_sender')} />
+                        </Tabs>
 
-                            {/* Sender tab */}
-                            {tab === 1 && (
-                                <Box>
-                                    <Stack spacing={2}>
-                                        {transfers?.asSender?.length ? (
-                                            transfers.asSender.map((transfer) => (
-                                                <Card sx={{ p: 2 }} key={transfer.id}>
-                                                    <Stack
-                                                        direction={{ xs: "column", sm: "row" }}
-                                                        alignItems={{ xs: "flex-start", sm: "center" }}
-                                                        justifyContent="space-between"
-                                                        spacing={1}
-                                                    >
-                                                        <Stack direction="row" spacing={1} alignItems="center">
-                                                            <Typography variant="subtitle1" fontWeight="bold">
-                                                                {TYPES[transfer.type] ?? "Other Payment"}
-                                                            </Typography>
-                                                            <Typography variant="body1" color="error">
-                                                                -{transfer.amount} PSU
-                                                            </Typography>
-                                                            {transfer.status === "approved" ? (
-                                                                <Chip sx={{ml: 1}} label="Approved" color="primary" size="small" />
-                                                            ) : transfer.status === "pending" ? (
-                                                                <Chip sx={{ml: 1}} label="Pending" color="info" size="small" />
-                                                            ) : transfer.status === "refunded" ? (
-                                                                <Chip sx={{ml: 1}} label="Refunded" color="warning" size="small" />
-                                                            ) : (
-                                                                <Chip sx={{ml: 1}} label="Declined" color="error" size="small" />
-                                                            )}
-                                                            <IconButton onClick={() => openModal(transfer)}><Info /></IconButton>
-                                                        </Stack>
+                        {/* Receiver tab */}
+                        {tab === 0 && (
+                            <Box>
+                                <Stack spacing={2}>
+                                    {transfers?.asReceiver?.length ? (
+                                        transfers.asReceiver.map((transfer) => (
+                                            <Card sx={{ p: 2 }} key={transfer.id}>
+                                                <Stack
+                                                    direction={{ xs: "column", sm: "row" }}
+                                                    alignItems={{ xs: "flex-start", sm: "center" }}
+                                                    justifyContent="space-between"
+                                                    spacing={1}
+                                                >
+                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold">
+                                                            {TYPES[transfer.type] ?? t('transfers.types.other')}
+                                                        </Typography>
+                                                        <Typography variant="body1" color="primary">
+                                                            +{transfer.amount} PSU
+                                                        </Typography>
+                                                        <Chip sx={{ ml: 1 }} label={t(`transfers.status.${transfer.status}`)} color={transfer.status === 'approved' ? 'primary' : transfer.status === 'pending' ? 'info' : transfer.status === 'refunded' ? 'warning' : 'error'} size="small" />
+                                                        <IconButton onClick={() => openModal(transfer)}><Info /></IconButton>
                                                     </Stack>
-                                                </Card>
-                                            ))
-                                        ) : (
-                                            <Typography variant="h6" gutterBottom>
-                                                No sent transfers
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Box>
-                            )}
-                        </Container>
-                    </>
-                ) : (<></>)}
+                                                </Stack>
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        <Typography variant="h6" gutterBottom>
+                                            {t('transfers.no_received')}
+                                        </Typography>
+                                    )}
+                                </Stack>
+                            </Box>
+                        )}
+
+                        {/* Sender tab */}
+                        {tab === 1 && (
+                            <Box>
+                                <Stack spacing={2}>
+                                    {transfers?.asSender?.length ? (
+                                        transfers.asSender.map((transfer) => (
+                                            <Card sx={{ p: 2 }} key={transfer.id}>
+                                                <Stack
+                                                    direction={{ xs: "column", sm: "row" }}
+                                                    alignItems={{ xs: "flex-start", sm: "center" }}
+                                                    justifyContent="space-between"
+                                                    spacing={1}
+                                                >
+                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold">
+                                                            {TYPES[transfer.type] ?? t('transfers.types.other')}
+                                                        </Typography>
+                                                        <Typography variant="body1" color="error">
+                                                            -{transfer.amount} PSU
+                                                        </Typography>
+                                                        <Chip sx={{ ml: 1 }} label={t(`transfers.status.${transfer.status}`)} color={transfer.status === 'approved' ? 'primary' : transfer.status === 'pending' ? 'info' : transfer.status === 'refunded' ? 'warning' : 'error'} size="small" />
+                                                        <IconButton onClick={() => openModal(transfer)}><Info /></IconButton>
+                                                    </Stack>
+                                                </Stack>
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        <Typography variant="h6" gutterBottom>
+                                            {t('transfers.no_sent')}
+                                        </Typography>
+                                    )}
+                                </Stack>
+                            </Box>
+                        )}
+                    </Container>
+                )}
             </Container>
+
             {/* Modal for transfer details */}
             <Dialog open={!!selected} onClose={closeModal} maxWidth="sm" fullWidth>
                 {selected && (
                     <>
-                        <DialogTitle>Transfer Details</DialogTitle>
+                        <DialogTitle>{t('transfers.modal.title')}</DialogTitle>
                         <DialogContent dividers>
                             <Stack spacing={2}>
-                                <Typography>
-                                    <strong>Type:</strong>  {TYPES[selected.type] ?? "Other Payment"}
-                                </Typography>
-                                <Typography>
-                                    <strong>Amount:</strong> {selected.amount} PSU
-                                </Typography>
-                                <Typography>
-                                    <strong>Status:</strong>
-                                    {selected.status === "approved" ? (
-                                        <Chip sx={{ml: 1}} label="Approved" color="primary" size="small" />
-                                    ) : selected.status === "pending" ? (
-                                        <Chip sx={{ml: 1}} label="Pending" color="info" size="small" />
-                                    ) : selected.status === "refunded" ? (
-                                        <Chip sx={{ml: 1}} label="Refunded" color="warning" size="small" />
-                                    ) : (
-                                        <Chip sx={{ml: 1}} label="Declined" color="error" size="small" />
-                                    )}
-                                </Typography>
-
-
-                                <Typography>
-                                    <strong>Created at:</strong>{" "}
-                                    {new Date(selected.created_at).toLocaleString()}
-                                </Typography>
-                                {selected.error && (
-                                    <Typography color="error">
-                                        <strong>Error:</strong> {selected.error}
-                                    </Typography>
-                                )}
+                                <Typography><strong>{t('transfers.modal.type')}:</strong> {TYPES[selected.type] ?? t('transfers.types.other')}</Typography>
+                                <Typography><strong>{t('transfers.modal.amount')}:</strong> {selected.amount} PSU</Typography>
+                                <Typography><strong>{t('transfers.modal.status')}:</strong></Typography>
+                                <Chip sx={{ ml: 1 }} label={t(`transfers.status.${selected.status}`)} color={selected.status === 'approved' ? 'primary' : selected.status === 'pending' ? 'info' : selected.status === 'refunded' ? 'warning' : 'error'} size="small" />
+                                <Typography><strong>{t('transfers.modal.created_at')}:</strong> {new Date(selected.created_at).toLocaleString()}</Typography>
+                                {selected.error && <Typography color="error"><strong>{t('transfers.modal.error')}:</strong> {selected.error}</Typography>}
                             </Stack>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={closeModal} variant="contained">
-                                Close
-                            </Button>
+                            <Button onClick={closeModal} variant="contained">{t('transfers.modal.close')}</Button>
                         </DialogActions>
                     </>
                 )}

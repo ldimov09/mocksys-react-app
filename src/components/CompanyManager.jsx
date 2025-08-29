@@ -6,14 +6,7 @@ import {
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
-
-const LEGAL_FORMS = {
-    'ad': 'PLC',
-    'ead': 'Sole PLC',
-    'eood': 'Ltd (Sole)',
-    'et': 'Sole Trader',
-    'ood': 'Ltd'
-};
+import { useTranslations } from '../contexts/TranslationContext';
 
 const defaultForm = {
     manager_name: '',
@@ -25,13 +18,22 @@ const defaultForm = {
 export default function CompanyManager() {
     const { showAlert } = useAlert();
     const { user, login } = useAuth();
+    const { t } = useTranslations();
     const [form, setForm] = useState(defaultForm);
     const [company, setCompany] = useState(null);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState({});
-    
+
+    const LEGAL_FORMS = {
+        'ad': t('company.legal_forms.ad'),
+        'ead': t('company.legal_forms.ead'),
+        'eood': t('company.legal_forms.eood'),
+        'et': t('company.legal_forms.et'),
+        'ood': t('company.legal_forms.ood')
+    };
+
 
     const fetchCompany = async () => {
         setLoading(true);
@@ -70,20 +72,18 @@ export default function CompanyManager() {
                 const res = await api.post('/api/company', form);
                 setCompany(res.data);
             }
-            // Refresh user info
             const response = await api.get(`/api/users/${user.account_number}`);
-            
             login(response?.data?.data);
             setOpen(false);
             setErrors({});
-            showAlert("Compnay saved succesfully!", "success");
+            showAlert(t('company.alerts.saved'), "success");
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
-                showAlert("There are errors in your form.", "warning");
+                showAlert(t('company.alerts.form_error'), "warning");
             } else {
                 console.error('Unexpected error:', err);
-                showAlert("Unexpected error occured " + err, "error");
+                showAlert(t('company.alerts.unexpected'), "error");
             }
         } finally {
             setSaving(false);
@@ -100,10 +100,10 @@ export default function CompanyManager() {
             const response = await api.get(`/api/users/${user.account_number}`);
             login(response?.data?.data);
             setOpen(false);
-            showAlert("Compnay deleted succesfully!", "success");
+            showAlert(t('company.alerts.deleted'), "success");
         } catch (err) {
             console.error(err);
-            showAlert("An error occured", "error");
+            showAlert(t('company.alerts.delete_error'), "error");
         } finally {
             setSaving(false);
         }
@@ -115,67 +115,68 @@ export default function CompanyManager() {
                 <CircularProgress size={24} />
             ) : company ? (
                 <Box>
-                    <Typography><strong>Name:</strong> {company.name}</Typography>
-                    <Typography><strong>Manager:</strong> {company.manager_name}</Typography>
-                    <Typography><strong>Number:</strong> {company.number}</Typography>
-                    <Typography><strong>Address:</strong> {company.address}</Typography>
-                    <Typography><strong>Legal Form:</strong> {LEGAL_FORMS[company.legal_form]}</Typography>
+                    <Typography><strong>{t('company.fields.name')}:</strong> {company.name}</Typography>
+                    <Typography><strong>{t('company.fields.manager')}:</strong> {company.manager_name}</Typography>
+                    <Typography><strong>{t('company.fields.number')}:</strong> {company.number}</Typography>
+                    <Typography><strong>{t('company.fields.address')}:</strong> {company.address}</Typography>
+                    <Typography><strong>{t('company.fields.legal_form')}:</strong> {LEGAL_FORMS[company.legal_form]}</Typography>
                     <Box mt={2}>
-                        <Button variant="outlined" onClick={() => setOpen(true)}>Edit Company</Button>
+                        <Button variant="outlined" onClick={() => setOpen(true)}>
+                            {saving ? <CircularProgress size={20} color='inherit' /> : t('company.actions.edit')}
+                        </Button>
                         <Button variant="outlined" color="error" onClick={handleDelete} sx={{ ml: 1 }}>
-                            {saving ? <CircularProgress size={20} color='inherit' /> : 'Delete Company'}
+                            {saving ? <CircularProgress size={20} color='inherit' /> : t('company.actions.delete')}
                         </Button>
                     </Box>
                 </Box>
             ) : (
-                <Button variant="contained" onClick={() => {
-                    setErrors({}); 
-                    setOpen(true)}
-                }>Create Company</Button>
+                <Button variant="contained" onClick={() => { setErrors({}); setOpen(true) }}>
+                    {t('company.actions.create')}
+                </Button>
             )}
 
             <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-                <DialogTitle>{company ? 'Edit Company' : 'Create Company'}</DialogTitle>
+                <DialogTitle>{company ? t('company.dialog.edit') : t('company.dialog.create')}</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                     <TextField
-                        label="Manager Name"
+                        label={t('company.fields.manager')}
                         name="manager_name"
                         value={form.manager_name}
                         onChange={handleChange}
                         fullWidth
                         variant="standard"
-                        error={!!errors.manager_name} 
+                        error={!!errors.manager_name}
                         helperText={errors.manager_name?.[0]}
                     />
                     <TextField
-                        label="Company Name"
+                        label={t('company.fields.name')}
                         name="name"
                         value={form.name}
                         onChange={handleChange}
                         fullWidth
                         variant="standard"
-                        error={!!errors.name} 
+                        error={!!errors.name}
                         helperText={errors.name?.[0]}
                     />
                     <TextField
-                        label="Address"
+                        label={t('company.fields.address')}
                         name="address"
                         value={form.address}
                         onChange={handleChange}
                         fullWidth
                         variant="standard"
-                        error={!!errors.address} 
+                        error={!!errors.address}
                         helperText={errors.address?.[0]}
                     />
                     <TextField
-                        label="Legal Form"
+                        label={t('company.fields.legal_form')}
                         name="legal_form"
                         value={form.legal_form}
                         onChange={handleChange}
                         select
                         fullWidth
                         variant="standard"
-                        error={!!errors.legal_form} 
+                        error={!!errors.legal_form}
                         helperText={errors.legal_form?.[0]}
                     >
                         {Object.entries(LEGAL_FORMS).map(([key, label]) => (
@@ -184,9 +185,9 @@ export default function CompanyManager() {
                     </TextField>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpen(false)} color='info'>Cancel</Button>
+                    <Button onClick={() => setOpen(false)} color='info'>{t('common.cancel')}</Button>
                     <Button onClick={handleSave} variant="contained" disabled={saving}>
-                        {saving ? <CircularProgress size={20} /> : 'Save'}
+                        {saving ? <CircularProgress size={20} /> : t('common.save')}
                     </Button>
                 </DialogActions>
             </Dialog>

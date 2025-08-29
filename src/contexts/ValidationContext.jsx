@@ -9,7 +9,7 @@ export function ValidationProvider({ children }) {
 
   // Validate all required fields inside the container with data-required="true"
   // Optionally limit validation scope by container ref or document by default
-  const validateAll = useCallback((container = document) => {
+  const validateAll = useCallback((container = document, t) => { // Pass down translation function - doesn't work otherwise.
     const requiredFields = container.querySelectorAll('*:required');
     let newErrors = {};
     let hasErrors = false;
@@ -19,9 +19,8 @@ export function ValidationProvider({ children }) {
       const name = field.name || null;
       if (!name) return; // skip fields without name
 
-      if (value === '') {
-        console.log(field);
-        newErrors[name] = 'This field is required';
+      if (value === '') {        
+        newErrors[name] = t('common.required_field');
         hasErrors = true;
       }
     });

@@ -11,16 +11,16 @@ import { TranslationProvider } from './contexts/TranslationContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AlertProvider>
-      <AuthProvider>
-        <TranslationProvider>
+    <TranslationProvider>
+      <AlertProvider>
+        <AuthProvider>
           <ValidationProvider>
             <ThemeProvider theme={theme}>
               <App />
             </ThemeProvider>
           </ValidationProvider>
-        </TranslationProvider>
-      </AuthProvider>
-    </AlertProvider>
+        </AuthProvider>
+      </AlertProvider>
+    </TranslationProvider>
   </React.StrictMode>
 );

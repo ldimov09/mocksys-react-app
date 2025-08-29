@@ -13,10 +13,12 @@ import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
 import { useValidation } from '../contexts/ValidationContext';
+import { useTranslations } from '../contexts/TranslationContext';
 
 export default function TransferForm() {
   const { user, login } = useAuth();
   const { showAlert } = useAlert();
+  const { t } = useTranslations();
 
   const [receiverAccount, setReceiverAccount] = useState('');
   const [pin, setPin] = useState('');
@@ -28,10 +30,10 @@ export default function TransferForm() {
   const { validateAll, getFieldProps, errors } = useValidation();
 
   const handlePreview = async () => {
-    const valid = validateAll(document.querySelector(".transferForm"));
+    const valid = validateAll(document.querySelector(".transferForm"), t);
 
     if (!valid) {
-      showAlert('All fields are required', 'warning');
+      showAlert(t('transfer.all_fields_required'), 'warning');
       return;
     }
 
@@ -41,11 +43,12 @@ export default function TransferForm() {
       setReceiverData(response.data.data);
       setModalOpen(true);
     } catch (err) {
-      showAlert("An error occured. " + (err.response.data.error ?? ""), 'error');
+      showAlert(t('transfer.error_occurred') + " " + (err.response?.data?.error ?? ""), 'error');
     } finally {
       setLoading(false);
     }
-  };
+
+  }
 
   const handleConfirmTransfer = async () => {
     try {
@@ -57,18 +60,15 @@ export default function TransferForm() {
 
       const response = await api.post('/api/transfer', payload);
 
-      console.log(response?.data?.balance);
-
       user.balance = response.data.balance ?? user.balance;
-
-      login(user); // Update user context (e.g. new balance)
-      showAlert('Transfer successful!', 'success');
+      login(user);
+      showAlert(t('transfer.successful'), 'success');
       setModalOpen(false);
       setReceiverAccount('');
       setPin('');
       setAmount('');
     } catch (err) {
-      showAlert(err.response?.data?.error || 'Transfer failed', 'error');
+      showAlert(err.response?.data?.error || t('transfer.failed'), 'error');
     }
   };
 
@@ -76,7 +76,7 @@ export default function TransferForm() {
     <Box sx={{ mt: 3 }} className="transferForm">
       <TextField
         variant="standard"
-        label="Receiver Account Number"
+        label={t('transfer.receiver_account')}
         fullWidth
         margin="normal"
         value={receiverAccount}
@@ -87,7 +87,7 @@ export default function TransferForm() {
       />
       <TextField
         variant="standard"
-        label="Amount"
+        label={t('transfer.amount')}
         fullWidth
         type="number"
         margin="normal"
@@ -99,7 +99,7 @@ export default function TransferForm() {
       />
       <TextField
         variant="standard"
-        label="Your PIN"
+        label={t('transfer.pin')}
         fullWidth
         type="password"
         margin="normal"
@@ -116,24 +116,24 @@ export default function TransferForm() {
         onClick={handlePreview}
         disabled={loading}
       >
-        Preview Transfer
+        {t('transfer.preview')}
       </Button>
 
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
-        <DialogTitle>Confirm Transfer</DialogTitle>
+        <DialogTitle>{t('transfer.confirm_title')}</DialogTitle>
         <DialogContent sx={{ minWidth: 350 }}>
           {receiverData && (
             <>
-              <Typography><strong>To:</strong> {receiverData.name}</Typography>
-              <Typography><strong>Account:</strong> {receiverData.account_number}</Typography>
-              <Typography><strong>Amount:</strong> PSU {Number(amount).toFixed(2)}</Typography>
+              <Typography><strong>{t('transfer.to')}:</strong> {receiverData.name}</Typography>
+              <Typography><strong>{t('transfer.account')}:</strong> {receiverData.account_number}</Typography>
+              <Typography><strong>{t('transfer.amount')}:</strong> PSU {Number(amount).toFixed(2)}</Typography>
             </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalOpen(false)}>Cancel</Button>
+          <Button onClick={() => setModalOpen(false)}>{t('transfer.cancel')}</Button>
           <Button onClick={handleConfirmTransfer} variant="contained" color="primary">
-            Confirm
+            {t('transfer.confirm')}
           </Button>
         </DialogActions>
       </Dialog>

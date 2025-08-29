@@ -7,7 +7,11 @@ import {
     Stack,
     Card,
     Typography,
-    Container
+    Container,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import { Add, Edit, Delete, Info } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
@@ -44,6 +48,29 @@ export default function ItemManager() {
         showAlert(t('common.no_access_page'), "warning");
         navigate("/");
     }
+
+    const UNITS = [ 
+        { 
+            "name": t('items.pcs'), 
+            "value": "pcs" 
+        },
+        { 
+            "name": t('items.kg'), 
+            "value": "kg" 
+        },
+        { 
+            "name": t('items.L'), 
+            "value": "L" 
+        },
+        { 
+            "name": t('items.g'), 
+            "value": "g" 
+        },
+        { 
+            "name": t('items.mL'), 
+            "value": "mL" 
+        } 
+    ];
 
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -193,7 +220,21 @@ export default function ItemManager() {
                         <TextField required label={t('items.short_name')} error={!!errors.short_name} helperText={errors.short_name?.[0]} name="short_name" value={form.short_name} onChange={handleChange} fullWidth variant="standard" />
                         <TextField required label={t('items.price')} error={!!errors.price} helperText={errors.price?.[0]} name="price" type="number" value={form.price} onChange={handleChange} fullWidth variant="standard" />
                         <TextField required label={t('items.number')} error={!!errors.number} helperText={errors.number?.[0]} name="number" type="number" value={form.number} onChange={handleChange} fullWidth variant="standard" />
-                        <TextField required label={t('items.unit')} error={!!errors.unit} helperText={errors.unit?.[0]} name="unit" value={form.unit} onChange={handleChange} fullWidth variant="standard" />
+                        <FormControl fullWidth variant="standard" error={!!errors.unit}>
+                            <InputLabel>{t('items.unit')}</InputLabel>
+                            <Select
+                                name="unit"
+                                value={form.unit}
+                                onChange={handleChange}
+                            >
+                                {UNITS.map((unit) => (
+                                    <MenuItem key={unit.value} value={unit.value}>
+                                        {unit.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            {errors.unit && <FormHelperText>{errors.unit[0]}</FormHelperText>}
+                        </FormControl>
                     </DialogContent>
                     <DialogActions>
                         <Button color="info" onClick={handleCloseForm} disabled={isSaving}>
@@ -213,7 +254,20 @@ export default function ItemManager() {
                         <TextField label={t('items.short_name')} value={selectedItem?.short_name || ''} fullWidth variant="standard" />
                         <TextField label={t('items.price')} value={selectedItem?.price || ''} fullWidth variant="standard" />
                         <TextField label={t('items.number')} value={selectedItem?.number || ''} fullWidth variant="standard" />
-                        <TextField label={t('items.unit')} value={selectedItem?.unit || ''} fullWidth variant="standard" />
+                        <FormControl fullWidth variant="standard">
+                            <InputLabel>{t('items.unit')}</InputLabel>
+                            <Select
+                                name="unit"
+                                value={selectedItem?.unit || ''}
+                                onChange={handleChange}
+                            >
+                                {UNITS.map((unit) => (
+                                    <MenuItem key={unit.value} value={unit.value}>
+                                        {unit.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDetails} color="info">{t('common.close')}</Button>
@@ -227,7 +281,7 @@ export default function ItemManager() {
                     onConfirm={handleDelete}
                     isDeleting={isDeleting}
                     title={t('items.delete_item')}
-                    description={t('items.delete_item_confirm') + " " + itemToDelete?.name + "?" }
+                    description={t('items.delete_item_confirm') + " " + itemToDelete?.name + "?"}
                 />
             </Box>
         </Container>

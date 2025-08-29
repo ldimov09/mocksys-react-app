@@ -33,8 +33,17 @@ export function TranslationProvider({ children }) {
     localStorage.setItem('locale', JSON.stringify(loc));
   };
 
-  const t = (key, fallback) => getNested(translations, key, fallback);
+  const t = (key, paramsOrFallback) => {
+    let str = getNested(translations, key, typeof paramsOrFallback === 'string' ? paramsOrFallback : key);
 
+    if (paramsOrFallback && typeof paramsOrFallback === 'object') {
+      Object.entries(paramsOrFallback).forEach(([param, value]) => {
+        str = str.replace(new RegExp(`{{\\s*${param}\\s*}}`, 'g'), value);
+      });
+    }
+
+    return str;
+  };
   return (
     <TranslationContext.Provider value={{ locale, setLocale, t }}>
       {children}

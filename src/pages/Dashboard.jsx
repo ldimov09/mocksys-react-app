@@ -1,14 +1,13 @@
 import { Box, Typography, Paper, Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import TransferForm from '../components/TransferForm';
 import KeysModule from '../components/KeysModule';
-import ItemManager from '../components/ItemManager';
 import CompanyManager from '../components/CompanyManager';
-import DevicesManager from '../components/DevicesManager';
+import { useTranslations } from '../contexts/TranslationContext';
 
 export default function Dashboard() {
     const { user } = useAuth();
+    const { t } = useTranslations();
 
     if (!user) {
         return <Navigate to="/login" replace />;
@@ -17,19 +16,19 @@ export default function Dashboard() {
     const parseStatus = (status) => {
         const statuses = {
             'enabled_active': {
-                name: 'Enabled active',
+                name: t('dashboard.status.enabled_active.name'),
                 color: 'light',
-                help: 'You have access to your account and are able to participate in transactions.',
+                help: t('dashboard.status.enabled_active.help'),
             },
             'enabled_inactive': {
-                name: 'Enabled inactive',
+                name: t('dashboard.status.enabled_inactive.name'),
                 color: 'warning',
-                help: 'You have access to your account but are not able to participate in transactions.',
+                help: t('dashboard.status.enabled_inactive.help'),
             },
             'disabled_inactive': {
-                name: 'Disabled inactive',
+                name: t('dashboard.status.disabled_inactive.name'),
                 color: 'error',
-                help: 'You don\'t have access to your account. Please log out.',
+                help: t('dashboard.status.disabled_inactive.help'),
             },
         }
 
@@ -41,43 +40,40 @@ export default function Dashboard() {
             {user ? (
                 <>
                     <Typography variant="h4" gutterBottom>
-                        Dashboard
+                        {t('dashboard.title')}
                     </Typography>
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500 }}>
-                        <Typography variant="h6">Welcome, {user.name}!</Typography>
-                        <Chip color="secondary" label={"Balance: PSU " + Number(user.balance)?.toFixed(2)} sx={{ mr: 1 }}/>
-                        <Chip label={"Role: " + user.role} sx={{ mr: 1 }}/>
+                        <Typography variant="h6">{t('dashboard.welcome', { name: user.name })}</Typography>
+                        <Chip color="secondary" label={t('dashboard.balance', { balance: Number(user.balance).toFixed(2) })} sx={{ mr: 1 }} />
+                        <Chip label={t('dashboard.role', { role: user.role })} sx={{ mr: 1 }} />
                         <Tooltip title={parseStatus(user?.status)?.help}>
-                            <Chip label={"Status: " + parseStatus(user?.status)?.name} color={parseStatus(user?.status)?.color} sx={{ mr: 1 }}/>
+                            <Chip label={t('dashboard.status_label', { status: parseStatus(user?.status)?.name })} color={parseStatus(user?.status)?.color} sx={{ mr: 1 }} />
                         </Tooltip>
                     </Paper>
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
-                        <Typography variant="h6" gutterBottom>Keys handling</Typography>
-                            <KeysModule />
+                        <Typography variant="h6" gutterBottom>{t('dashboard.keys_handling')}</Typography>
+                        <KeysModule />
                     </Paper>
 
                     <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mt: 3 }}>
-                        <Typography variant="h6" gutterBottom>Company</Typography>
+                        <Typography variant="h6" gutterBottom>{t('dashboard.company')}</Typography>
                         {user.role == "business" ? (
-                            <>
-                                <CompanyManager />
-                            </>
-                        ) :
-                            <>
-                                <Typography variant="body1" gutterBottom>This account has to be a busiess one to have a company.</Typography>
-                            </>
-                        }
+                            <CompanyManager />
+                        ) : (
+                            <Typography variant="body1" gutterBottom>
+                                {t('dashboard.company_not_business')}
+                            </Typography>
+                        )}
                     </Paper>
                 </>
             ) : (
-                <>
-                    <Button color="inherit" component={Link} to="/login">
-                        Login
-                    </Button>
-                </>
+                <Button color="inherit" component={Link} to="/login">
+                    {t('dashboard.login')}
+                </Button>
             )}
         </Box>
     );
 }
+

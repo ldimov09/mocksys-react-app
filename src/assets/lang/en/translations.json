@@ -33,7 +33,8 @@
         "unexpected_error": "Unexpected error occurred",
         "form_errors": "There are errors in your form.",
         "save": "Save",
-        "install": "Install App"
+        "install": "Install App",
+        "required_field": "This field is required"
     },
     "items": {
         "item_saved": "Item saved.",
@@ -47,6 +48,162 @@
         "short_name": "Short Name",
         "price": "Price",
         "number": "Number",
-        "unit": "Unit"
+        "unit": "Unit",
+        "pcs": "pcs",
+        "kg": "kg",
+        "L": "L",
+        "g": "g",
+        "mL": "mL"
+    },
+    "keys": {
+        "transaction_key": "Transaction Key",
+        "fiscal_key": "Fiscal Key",
+        "not_generated": "— Not Generated —",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "generate_new": "Generate New",
+        "disable": "Disable",
+        "enable": "Enable",
+        "key_updated": "{{type}} updated successfully!",
+        "error_generic": "Something went wrong"
+    },
+    "company": {
+        "fields": {
+            "name": "Company Name",
+            "manager": "Manager Name",
+            "number": "Company Number",
+            "address": "Address",
+            "legal_form": "Legal Form"
+        },
+        "actions": {
+            "edit": "Edit Company",
+            "delete": "Delete Company",
+            "create": "Create Company"
+        },
+        "dialog": {
+            "edit": "Edit Company",
+            "create": "Create Company"
+        },
+        "alerts": {
+            "saved": "Company saved successfully!",
+            "deleted": "Company deleted successfully!",
+            "form_error": "There are errors in your form.",
+            "unexpected": "An unexpected error occurred.",
+            "delete_error": "Could not delete company."
+        },
+        "legal_forms": {
+            "ad": "PLC",
+            "ead": "Sole PLC",
+            "eood": "Ltd (Sole)",
+            "et": "Sole Trader",
+            "ood": "Ltd"
+        }
+    },
+    "navbar": {
+        "login": "Login",
+        "register_full": "Register Full",
+        "dashboard": "Dashboard",
+        "transfers": "Transfers",
+        "items": "Items",
+        "devices": "Devices",
+        "logout": "Logout"
+    },
+    "transfer": {
+        "all_fields_required": "All fields are required",
+        "error_occurred": "An error occurred.",
+        "successful": "Transfer successful!",
+        "failed": "Transfer failed",
+        "receiver_account": "Receiver Account Number",
+        "amount": "Amount",
+        "pin": "Your PIN",
+        "preview": "Preview Transfer",
+        "confirm_title": "Confirm Transfer",
+        "to": "To",
+        "account": "Account",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Welcome, {{name}}!",
+        "balance": "Balance: PSU {{balance}}",
+        "role": "Role: {{role}}",
+        "status_label": "Status: {{status}}",
+        "status": {
+            "enabled_active": {
+                "name": "Enabled active",
+                "help": "You have access to your account and are able to participate in transactions."
+            },
+            "enabled_inactive": {
+                "name": "Enabled inactive",
+                "help": "You have access to your account but are not able to participate in transactions."
+            },
+            "disabled_inactive": {
+                "name": "Disabled inactive",
+                "help": "You don't have access to your account. Please log out."
+            }
+        },
+        "keys_handling": "Keys handling",
+        "company": "Company",
+        "company_not_business": "This account has to be a business one to have a company.",
+        "login": "Login"
+    },
+    "registration": {
+        "success": "Registration successful! Logged in.",
+        "failure": "Registration failed.",
+        "user_name": "User Name",
+        "user_username": "Username",
+        "user_password": "Password",
+        "business_name": "Business Name",
+        "business_username": "Username",
+        "business_password": "Password",
+        "manager_name": "Manager Name",
+        "company_name": "Company Name",
+        "company_address": "Address",
+        "legal_form": "Legal Form",
+        "back": "Back",
+        "next": "Next",
+        "submit": "Submit",
+        "unknown_step": "Unknown step",
+        "user": "User",
+        "business_user": "Business user",
+        "company": "Company"
+    },
+    "transfers": {
+        "title": "Transfer to another account",
+        "as_receiver": "As receiver - last 30 days",
+        "as_sender": "As sender - last 30 days",
+        "no_received": "No received transfers",
+        "no_sent": "No sent transfers",
+        "types": {
+            "card_payment": "Card Payment",
+            "transfer": "Transfer",
+            "other": "Other Payment"
+        },
+        "status": {
+            "approved": "Approved",
+            "pending": "Pending",
+            "refunded": "Refunded",
+            "declined": "Declined"
+        },
+        "modal": {
+            "title": "Transfer Details",
+            "type": "Type",
+            "amount": "Amount",
+            "status": "Status",
+            "created_at": "Created at",
+            "error": "Error",
+            "close": "Close"
+        }
+    },
+    "login": {
+        "title": "Login",
+        "username": "Username",
+        "password": "Password",
+        "submit": "Login",
+        "fix_errors": "Please fix the errors in the form.",
+        "success": "Login successful!",
+        "failed": "Login failed.",
+        "unknown_error": "Unknown error."
     }
 }

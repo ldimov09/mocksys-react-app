@@ -33,6 +33,7 @@ export default function Navbar() {
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // md = 960px breakpoint
 
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const { t } = useTranslations();
 
     const handleLogout = () => {
         logout();
@@ -45,16 +46,15 @@ export default function Navbar() {
         setDrawerOpen(open);
     };
 
-    // Drawer menu items
     const menuItems = [
-        !user && { text: 'Register Full', to: '/register/full' },
-        !user && { text: 'Login', to: '/login' },
-        user && { text: 'Dashboard', to: '/' },
-        user && { text: 'Transfers', to: '/transfers' },
-        user && user?.role == "business" && { text: 'Items', to: '/items' },
-        user && user?.role == "business" && { text: 'Devices', to: '/devices' },
-        user && { text: 'Logout', action: handleLogout },
-    ].filter(Boolean); // remove falsey entries
+        !user && { text: t('navbar.register_full'), to: '/register/full' },
+        !user && { text: t('navbar.login'), to: '/login' },
+        user && { text: t('navbar.dashboard'), to: '/' },
+        user && { text: t('navbar.transfers'), to: '/transfers' },
+        user && user?.role === "business" && { text: t('navbar.items'), to: '/items' },
+        user && user?.role === "business" && { text: t('navbar.devices'), to: '/devices' },
+        user && { text: t('navbar.logout'), action: handleLogout },
+    ].filter(Boolean);
 
     const drawerList = (
         <Box
@@ -65,17 +65,15 @@ export default function Navbar() {
         >
             <Box
                 sx={{
-                    backgroundColor: 'primary.main', // theme primary color
-                    color: 'primary.contrastText',  // automatically picks readable text color
+                    backgroundColor: 'primary.main',
+                    color: 'primary.contrastText',
                     p: 2,
                     fontWeight: 'bold',
                     fontSize: '1.25rem',
                     textAlign: 'center',
                 }}
             >
-                <Typography variant="h6">
-                    Mocksys
-                </Typography>
+                <Typography variant="h6">Mocksys</Typography>
             </Box>
             <List>
                 {menuItems.map(({ text, to, action, disabled }, index) => (
@@ -111,56 +109,58 @@ export default function Navbar() {
                         </IconButton>
                     )}
 
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                        Mocksys
-                    </Typography>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>Mocksys</Typography>
 
                     <InstallButton />
 
-                    {!isSmallScreen && !user && (<>
-                        <Button color="inherit" component={Link} to="/login" sx={{ textTransform: "uppercase" }}>
-                            Login
-                        </Button>
-                        <Button color="inherit" component={Link} to="/register/full">
-                            Register Full
-                        </Button>
-                    </>)}
-
-                    {!isSmallScreen && user && (
+                    {!isSmallScreen && !user && (
                         <>
-                            <Button color="inherit" component={Link} to="/">
-                                Dashboard
+                            <Button color="inherit" component={Link} to="/login" sx={{ textTransform: "uppercase" }}>
+                                {t('navbar.login')}
                             </Button>
-                            <Button color="inherit" component={Link} to="/transfers">
-                                Transfers
-                            </Button>
-                            {user.role == "business" ? (
-                                <>
-                                    <Button color="inherit" component={Link} to="/items">
-                                        Items
-                                    </Button>
-                                    <Button color="inherit" component={Link} to="/devices">
-                                        Devices
-                                    </Button>
-                                </>
-                            ) : <></>}
-                            <Button color="inherit" onClick={handleLogout} sx={{ textTransform: "uppercase" }}>
-                                Logout
+                            <Button color="inherit" component={Link} to="/register/full">
+                                {t('navbar.register_full')}
                             </Button>
                         </>
                     )}
 
-                    {locale == "en"? (
-                        <Button value="bg" aria-label="BG" onClick={(e) => setLocale('bg')}>
-                            <img src="flag-bg-250.png" alt="BG" width={32}/>
-                        </Button>
-                        ) : (
-                        <Button value="en" aria-label="EN" onClick={(e) => setLocale('en')}>
-                            <img src="flag-us.png" alt="EN" width={32}/>
-                        </Button>
+                    {!isSmallScreen && user && (
+                        <>
+                            <Button color="inherit" component={Link} to="/">
+                                {t('navbar.dashboard')}
+                            </Button>
+                            <Button color="inherit" component={Link} to="/transfers">
+                                {t('navbar.transfers')}
+                            </Button>
+                            {user.role === "business" && (
+                                <>
+                                    <Button color="inherit" component={Link} to="/items">
+                                        {t('navbar.items')}
+                                    </Button>
+                                    <Button color="inherit" component={Link} to="/devices">
+                                        {t('navbar.devices')}
+                                    </Button>
+                                </>
+                            )}
+                            <Button color="inherit" onClick={handleLogout} sx={{ textTransform: "uppercase" }}>
+                                {t('navbar.logout')}
+                            </Button>
+                        </>
                     )}
-                </Toolbar>
-            </AppBar>
+
+                    {
+                        locale == "en" ? (
+                            <Button value="bg" aria-label="BG" onClick={(e) => setLocale('bg')}>
+                                <img src="/flag-bg-250.png" alt="BG" width={32} />
+                            </Button>
+                        ) : (
+                            <Button value="en" aria-label="EN" onClick={(e) => setLocale('en')}>
+                                <img src="/flag-us.png" alt="EN" width={32} />
+                            </Button>
+                        )
+                    }
+                </Toolbar >
+            </AppBar >
 
             <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
                 {drawerList}

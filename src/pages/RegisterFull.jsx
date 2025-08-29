@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     Box,
     Button,
@@ -9,23 +9,14 @@ import {
     Typography,
     MenuItem,
 } from "@mui/material";
-import axios from "axios";
 import { useAlert } from "../contexts/AlertContext";
 import api from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-
-const steps = ["User", "Business", "Company"];
-
-const LEGAL_FORMS = {
-    'ad': 'PLC',
-    'ead': 'Sole PLC',
-    'eood': 'Ltd (Sole)',
-    'et': 'Sole Trader',
-    'ood': 'Ltd'
-};
+import { useTranslations } from "../contexts/TranslationContext";
 
 const RegisterFull = () => {
+    const { t } = useTranslations();
     const { showAlert } = useAlert();
     const { user, login } = useAuth();
     const navigate = useNavigate();
@@ -43,6 +34,16 @@ const RegisterFull = () => {
         address: "",
         legal_form: "",
     });
+
+    const steps = [t('registration.user'), t('registration.business_user'), t('registration.company')];
+
+    const LEGAL_FORMS = {
+        'ad': t('company.legal_forms.ad'),
+        'ead': t('company.legal_forms.ead'),
+        'eood': t('company.legal_forms.eood'),
+        'et': t('company.legal_forms.et'),
+        'ood': t('company.legal_forms.ood')
+    };
 
     const handleNext = () => {
         if (activeStep < steps.length - 1) {
@@ -64,13 +65,13 @@ const RegisterFull = () => {
             setErrors({});
             const response = await api.post("/api/register/full", formData);
             const user = response.data.user;
-            login(user)
-            showAlert("Registration successful! Logged in.", "success");
+            login(user);
+            showAlert(t('registration.success'), "success");
             navigate('/');
         } catch (error) {
-            console.log(error?.response)
+            console.log(error?.response);
             setErrors(error?.response?.data?.errors);
-            showAlert("Registration failed.", "error");
+            showAlert(t('registration.failure'), "error");
         }
     };
 
@@ -80,7 +81,7 @@ const RegisterFull = () => {
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <TextField
-                            label="User Name"
+                            label={t('registration.user_name')}
                             name="user_name"
                             value={formData.user_name}
                             onChange={handleChange}
@@ -90,7 +91,7 @@ const RegisterFull = () => {
                             helperText={errors.user_name}
                         />
                         <TextField
-                            label="Username"
+                            label={t('registration.user_username')}
                             name="user_username"
                             value={formData.user_username}
                             onChange={handleChange}
@@ -100,7 +101,7 @@ const RegisterFull = () => {
                             helperText={errors.user_username}
                         />
                         <TextField
-                            label="Password"
+                            label={t('registration.user_password')}
                             type="password"
                             name="user_password"
                             value={formData.user_password}
@@ -116,7 +117,7 @@ const RegisterFull = () => {
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <TextField
-                            label="Business Name"
+                            label={t('registration.business_name')}
                             name="business_name"
                             value={formData.business_name}
                             onChange={handleChange}
@@ -126,7 +127,7 @@ const RegisterFull = () => {
                             helperText={errors.business_name}
                         />
                         <TextField
-                            label="Username"
+                            label={t('registration.business_username')}
                             name="business_username"
                             value={formData.business_username}
                             onChange={handleChange}
@@ -136,7 +137,7 @@ const RegisterFull = () => {
                             helperText={errors.business_username}
                         />
                         <TextField
-                            label="Password"
+                            label={t('registration.business_password')}
                             type="password"
                             name="business_password"
                             value={formData.business_password}
@@ -152,7 +153,7 @@ const RegisterFull = () => {
                 return (
                     <Box display="flex" flexDirection="column" gap={2}>
                         <TextField
-                            label="Manager Name"
+                            label={t('registration.manager_name')}
                             name="manager_name"
                             value={formData.manager_name}
                             onChange={handleChange}
@@ -162,7 +163,7 @@ const RegisterFull = () => {
                             helperText={errors.manager_name}
                         />
                         <TextField
-                            label="Company Name"
+                            label={t('registration.company_name')}
                             name="company_name"
                             value={formData.company_name}
                             onChange={handleChange}
@@ -172,7 +173,7 @@ const RegisterFull = () => {
                             helperText={errors.company_name}
                         />
                         <TextField
-                            label="Address"
+                            label={t('registration.company_address')}
                             name="company_address"
                             value={formData.company_address}
                             onChange={handleChange}
@@ -182,7 +183,7 @@ const RegisterFull = () => {
                             helperText={errors.company_address}
                         />
                         <TextField
-                            label="Legal Form"
+                            label={t('registration.legal_form')}
                             name="legal_form"
                             value={formData.legal_form}
                             onChange={handleChange}
@@ -199,7 +200,7 @@ const RegisterFull = () => {
                     </Box>
                 );
             default:
-                return <Typography>Unknown step</Typography>;
+                return <Typography>{t('registration.unknown_step')}</Typography>;
         }
     };
 
@@ -208,7 +209,7 @@ const RegisterFull = () => {
             <Stepper activeStep={activeStep} alternativeLabel>
                 {steps.map((label) => (
                     <Step key={label}>
-                        <StepLabel>{label}</StepLabel>
+                        <StepLabel>{t(label)}</StepLabel>
                     </Step>
                 ))}
             </Stepper>
@@ -221,10 +222,10 @@ const RegisterFull = () => {
                     onClick={handleBack}
                     variant="outlined"
                 >
-                    Back
+                    {t('registration.back')}
                 </Button>
                 <Button onClick={handleNext} variant="contained">
-                    {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                    {activeStep === steps.length - 1 ? t('registration.submit') : t('registration.next')}
                 </Button>
             </Box>
         </Box>

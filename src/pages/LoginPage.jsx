@@ -5,20 +5,21 @@ import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
 import { useValidation } from '../contexts/ValidationContext';
+import { useTranslations } from '../contexts/TranslationContext';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
+  const { t } = useTranslations();
 
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { validateAll, getFieldProps, errors } = useValidation();
 
-
   const validateFields = () => {
-    const isValid = validateAll();
+    const isValid = validateAll(document, t);
     return isValid;
   };
 
@@ -27,7 +28,7 @@ export default function LoginPage() {
     setError('');
 
     if (!validateFields()) {
-      showAlert('Please fix the errors in the form.', 'warning');
+      showAlert(t('login.fix_errors'), 'warning');
       return;
     }
 
@@ -38,25 +39,23 @@ export default function LoginPage() {
       });
 
       login(response.data.user);
-      showAlert('Login successful!', 'success');
-
+      showAlert(t('login.success'), 'success');
       navigate('/');
     } catch (err) {
       console.log(err);
-
-      const message = err.response?.data?.error || 'Unknown error.';
-      setError('Login failed.');
-      showAlert('Login failed. ' + message, 'error');
+      const message = err.response?.data?.error || t('login.unknown_error');
+      setError(t('login.failed'));
+      showAlert(t('login.failed') + ' ' + message, 'error');
     }
   };
 
   return (
     <Container maxWidth="sm">
       <Box sx={{ mt: 8 }}>
-        <Typography variant="h4" gutterBottom>Login</Typography>
+        <Typography variant="h4" gutterBottom>{t('login.title')}</Typography>
         <form onSubmit={handleSubmit} noValidate>
           <TextField
-            label="Username"
+            label={t('login.username')}
             fullWidth
             margin="normal"
             value={userName}
@@ -65,9 +64,11 @@ export default function LoginPage() {
             required
             name="username"
             {...getFieldProps('username')}
+            error={!!errors.username}
+            helperText={errors.username}
           />
           <TextField
-            label="Password"
+            label={t('login.password')}
             type="password"
             fullWidth
             margin="normal"
@@ -77,10 +78,12 @@ export default function LoginPage() {
             required
             name="password"
             {...getFieldProps('password')}
+            error={!!errors.password}
+            helperText={errors.password}
           />
           {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
           <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-            Login
+            {t('login.submit')}
           </Button>
         </form>
       </Box>

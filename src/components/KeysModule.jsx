@@ -12,11 +12,13 @@ import {
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
+import { useTranslations } from '../contexts/TranslationContext'; // assuming you have this
 import api from '../services/api';
 
 export default function KeysModule() {
   const { user, login } = useAuth();
   const { showAlert } = useAlert();
+  const { t } = useTranslations();
   const [loadingKey, setLoadingKey] = useState(null); // 'transaction' or 'fiscal' or null
 
   const handleKeyAction = async (type, action) => {
@@ -26,18 +28,19 @@ export default function KeysModule() {
 
     try {
       const response = await api.post(route);
-      
+
       user.fiscal_key = response.data.fiscal_key ?? user.fiscal_key;
       user.transaction_key = response.data.transaction_key ?? user.transaction_key;
       user.transaction_key_enabled = response.data.transaction_key_enabled ?? user.transaction_key_enabled;
       user.fiscal_key_enabled = response.data.fiscal_key_enabled ?? user.fiscal_key_enabled;
 
-      console.log(user);
-
       login(user);
-      showAlert(`${type.charAt(0).toUpperCase() + type.slice(1)} key updated successfully!`, 'success');
+      showAlert(
+        t('keys.key_updated', { type: t(`keys.${type}_key`) }),
+        'success'
+      );
     } catch (err) {
-      showAlert(err.response?.data?.error || 'Something went wrong', 'error');
+      showAlert(err.response?.data?.error || t('keys.error_generic'), 'error');
     } finally {
       setLoadingKey(null);
     }
@@ -47,7 +50,7 @@ export default function KeysModule() {
     const isFiscal = type === 'fiscal';
     const key = isFiscal ? user.fiscal_key : user.transaction_key;
     const enabled = isFiscal ? user.fiscal_key_enabled : user.transaction_key_enabled;
-    const label = isFiscal ? 'Fiscal Key' : 'Transaction Key';
+    const label = isFiscal ? t('keys.fiscal_key') : t('keys.transaction_key');
 
     return (
       <Card variant="outlined" sx={{ minWidth: 300 }}>
@@ -64,9 +67,13 @@ export default function KeysModule() {
               wordBreak: 'break-all'
             }}
           >
-            {key || '— Not Generated —'}
+            {key || t('keys.not_generated')}
           </Typography>
-          <Chip label={enabled ? 'Enabled' : 'Disabled'} color={enabled ? 'success' : 'error'} variant="outlined" />
+          <Chip
+            label={enabled ? t('keys.enabled') : t('keys.disabled')}
+            color={enabled ? 'success' : 'error'}
+            variant="outlined"
+          />
         </CardContent>
         <CardActions>
           <Button
@@ -74,14 +81,16 @@ export default function KeysModule() {
             onClick={() => handleKeyAction(type, 'reset')}
             disabled={loadingKey === type}
           >
-            {loadingKey === type ? <CircularProgress size={20} /> : 'Generate New'}
+            {loadingKey === type ? <CircularProgress size={20} /> : t('keys.generate_new')}
           </Button>
           <Button
             size="small"
             onClick={() => handleKeyAction(type, 'toggle')}
             disabled={loadingKey === type}
           >
-            {loadingKey === type ? <CircularProgress size={20} /> : (enabled ? 'Disable' : 'Enable')}
+            {loadingKey === type
+              ? <CircularProgress size={20} />
+              : (enabled ? t('keys.disable') : t('keys.enable'))}
           </Button>
         </CardActions>
       </Card>
@@ -92,11 +101,9 @@ export default function KeysModule() {
     <Box sx={{ mt: 4 }}>
       <Grid container spacing={2}>
         <Grid item>{renderKeyCard('transaction')}</Grid>
-        {(user.role == "business") ? 
-          <>
-            <Grid item>{renderKeyCard('fiscal')}</Grid>
-          </> 
-        : <></>}
+        {user.role === "business" && (
+          <Grid item>{renderKeyCard('fiscal')}</Grid>
+        )}
       </Grid>
     </Box>
   );
