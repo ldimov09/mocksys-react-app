@@ -16,7 +16,7 @@ import {
 import { Add, Edit, Delete, Info } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import api from '../services/api';
-import ConfirmDeleteDialog from './ConfirmDeleteDialog';
+import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog';
 import { useAlert } from '../contexts/AlertContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -210,6 +210,10 @@ export default function ItemManager() {
                             </Stack>
                         </Card>
                     ))}
+
+                    {items.length === 0 && !isLoading && (
+                        <Typography variant="body1">{t('items.no_items')}</Typography>
+                    )}
                 </Stack>
 
                 {/* Unified Create/Edit Modal */}

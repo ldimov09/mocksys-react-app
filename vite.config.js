@@ -35,12 +35,11 @@ export default ({ mode }) => {
       })
     ],
     preview: {
-      https: {
-        key: './localhost+1-key.pem',
-        cert: './localhost+1.pem'
-      },
       port: 3000,
       host: true
+    },
+    server: {
+      port: 5173,
     }
   });
 }

@@ -7,6 +7,7 @@ import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
 import { useTranslations } from '../contexts/TranslationContext';
+import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 
 const defaultForm = {
     manager_name: '',
@@ -25,6 +26,7 @@ export default function CompanyManager() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState({});
+    const [openDelete, setOpenDelete] = useState(false);
 
     const LEGAL_FORMS = {
         'ad': t('company.legal_forms.ad'),
@@ -73,7 +75,7 @@ export default function CompanyManager() {
                 setCompany(res.data);
             }
             const response = await api.get(`/api/users/${user.account_number}`);
-            login(response?.data?.data);
+            login({ ...response?.data?.data, token: user.token });
             setOpen(false);
             setErrors({});
             showAlert(t('company.alerts.saved'), "success");
@@ -98,7 +100,7 @@ export default function CompanyManager() {
             setCompany(null);
             setForm(defaultForm);
             const response = await api.get(`/api/users/${user.account_number}`);
-            login(response?.data?.data);
+            login({ ...response?.data?.data, token: user.token });
             setOpen(false);
             showAlert(t('company.alerts.deleted'), "success");
         } catch (err) {
@@ -106,6 +108,7 @@ export default function CompanyManager() {
             showAlert(t('company.alerts.delete_error'), "error");
         } finally {
             setSaving(false);
+            setOpenDelete(false);
         }
     };
 
@@ -124,7 +127,7 @@ export default function CompanyManager() {
                         <Button variant="outlined" onClick={() => setOpen(true)}>
                             {saving ? <CircularProgress size={20} color='inherit' /> : t('company.actions.edit')}
                         </Button>
-                        <Button variant="outlined" color="error" onClick={handleDelete} sx={{ ml: 1 }}>
+                        <Button variant="outlined" color="error" onClick={() => setOpenDelete(true)} sx={{ ml: 1 }}>
                             {saving ? <CircularProgress size={20} color='inherit' /> : t('company.actions.delete')}
                         </Button>
                     </Box>
@@ -191,6 +194,16 @@ export default function CompanyManager() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Confirm delete dialog */}
+            <ConfirmDeleteDialog
+                open={openDelete}
+                onClose={() => setOpenDelete(false)}
+                onConfirm={handleDelete}
+                isDeleting={saving}
+                title={t('company.delete_title')}
+                description={t('company.delete_confirmation')}
+            />
         </Box>
     );
 }

@@ -1,5 +1,6 @@
 {
     "devices": {
+        "no_devices": "No devices found.",
         "devices": "Devices",
         "add_device": "Add device",
         "edit_device": "Edit Device",
@@ -37,6 +38,7 @@
         "required_field": "This field is required"
     },
     "items": {
+        "no_items": "No items found.",
         "item_saved": "Item saved.",
         "item_deleted": "Item deleted.",
         "add_item": "Add Item",
@@ -97,16 +99,20 @@
             "eood": "Ltd (Sole)",
             "et": "Sole Trader",
             "ood": "Ltd"
-        }
+        },
+        "delete_confirmation": "Are you sure you want to delete this company? This action cannot be undone. All associated devices will stop functioning.",
+        "delete_title": "Company Deletion Confirmation"
     },
     "navbar": {
         "login": "Login",
         "register_full": "Register Full",
+        "register": "Register",
         "dashboard": "Dashboard",
         "transfers": "Transfers",
         "items": "Items",
         "devices": "Devices",
-        "logout": "Logout"
+        "logout": "Logout",
+        "logout_success": "Logout successful!"
     },
     "transfer": {
         "all_fields_required": "All fields are required",
@@ -129,6 +135,10 @@
         "balance": "Balance: PSU {{balance}}",
         "role": "Role: {{role}}",
         "status_label": "Status: {{status}}",
+        "card_number": "Card Number: {{card_number}}",
+        "account_number": "Account Number: {{account_number}}",
+        "card_number_help": "Your unique card number, used for identification when making card payments.",
+        "account_number_help": "Your unique account number, used for identification in bank transfers and incoming transactions.",
         "status": {
             "enabled_active": {
                 "name": "Enabled active",
@@ -167,7 +177,12 @@
         "unknown_step": "Unknown step",
         "user": "User",
         "business_user": "Business user",
-        "company": "Company"
+        "company": "Company",
+        "title": "Registration",
+        "role": "Role",
+        "password": "Password",
+        "username": "Username",
+        "name": "Name"
     },
     "transfers": {
         "title": "Transfer to another account",

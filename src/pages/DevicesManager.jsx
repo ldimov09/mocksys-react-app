@@ -15,9 +15,9 @@ import {
 import { Add, Edit, Delete, Info, CheckBox } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import api from '../services/api';
-import ConfirmDeleteDialog from './ConfirmDeleteDialog';
+import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog';
 import { useAlert } from '../contexts/AlertContext';
-import DeviceKeyQRModal from './DeviceKeyQrModal';
+import DeviceKeyQRModal from '../components/DeviceKeyQrModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslations } from '../contexts/TranslationContext';
@@ -195,6 +195,10 @@ export default function DeviceManager() {
                         </Stack>
                     </Card>
                 ))}
+
+                {devices.length === 0 && !isLoading && (
+                    <Typography variant="body1">{t('devices.no_devices')}</Typography>
+                )}
             </Stack>
             {/* Unified Create/Edit Modal */}
             <Dialog open={openForm} onClose={handleCloseForm} fullScreen={fullScreen}>

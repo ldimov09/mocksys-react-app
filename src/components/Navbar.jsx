@@ -37,7 +37,7 @@ export default function Navbar() {
 
     const handleLogout = () => {
         logout();
-        showAlert('Logout successful!', 'success');
+        showAlert(t('navbar.logout_success'), 'success');
         navigate('/login');
         setDrawerOpen(false);
     };
@@ -48,6 +48,7 @@ export default function Navbar() {
 
     const menuItems = [
         !user && { text: t('navbar.register_full'), to: '/register/full' },
+        !user && { text: t('navbar.register'), to: '/register' },
         !user && { text: t('navbar.login'), to: '/login' },
         user && { text: t('navbar.dashboard'), to: '/' },
         user && { text: t('navbar.transfers'), to: '/transfers' },
@@ -120,6 +121,9 @@ export default function Navbar() {
                             </Button>
                             <Button color="inherit" component={Link} to="/register/full">
                                 {t('navbar.register_full')}
+                            </Button>
+                            <Button color="inherit" component={Link} to="/register">
+                                {t('navbar.register')}
                             </Button>
                         </>
                     )}
